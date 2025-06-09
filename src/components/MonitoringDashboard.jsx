@@ -33,6 +33,10 @@ import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
+// 1. IMPORTS - Agregar al inicio del archivo
+import { ChakraProvider } from '@chakra-ui/react';
+import theme from '../theme';
+import ViewModeSelector from './ViewModeSelector';
 
 // 1. Importar los nuevos componentes
 import ContextMenu from './ContextMenu';
@@ -60,6 +64,18 @@ const MonitoringDashboard = () => {
   const [routeFilter, setRouteFilter] = useState('all');
   const [draggedBus, setDraggedBus] = useState(null);
   const [selectedPanel, setSelectedPanel] = useState(null);
+  // 4. ESTADOS ADICIONALES - Agregar después de los estados existentes:
+  // 4. ESTADOS ADICIONALES - Agregar después de los estados existentes:
+  const [viewModes, setViewModes] = useState({
+    1: '2x2',
+    2: '2x2',
+    3: '2x2',
+    4: '2x2'
+  });
+
+  // 3. ESTADOS ADICIONALES - Reemplazar/agregar después de los estados existentes:
+  const [globalViewMode, setGlobalViewMode] = useState('2x2');
+
   // const [contextMenu, setContextMenu] = useState(null);
   // const [playingPanels, setPlayingPanels] = useState(new Set([1, 2, 3, 4])); // All panels playing by default
 
@@ -135,6 +151,81 @@ const MonitoringDashboard = () => {
       }
       return newSet;
     });
+  };
+
+  // 5. HANDLER PARA CAMBIO DE VISTA - Agregar esta función:
+  const handleViewModeChange = (mode, panelId) => {
+    setViewModes(prev => ({
+      ...prev,
+      [panelId]: mode
+    }));
+
+    toast({
+      title: `Modo de vista cambiado`,
+      description: `Panel ${panelId} configurado en ${mode}`,
+      status: 'info',
+      duration: 2000,
+      isClosable: true,
+    });
+  };
+
+  // 4. HANDLER PARA CAMBIO GLOBAL DE VISTA - Agregar esta función:
+  const handleGlobalViewModeChange = (mode) => {
+    setGlobalViewMode(mode);
+
+    let description = '';
+    switch (mode) {
+      case '2x2':
+        description = 'Vista cuádruple (4 paneles)';
+        break;
+      case '2x1':
+        description = 'Vista dual horizontal (2 paneles)';
+        break;
+      case '1x1':
+        description = 'Vista única (1 panel)';
+        break;
+      default:
+        description = `Vista configurada en ${mode}`;
+    }
+
+    toast({
+      title: `Modo de vista cambiado`,
+      description,
+      status: 'info',
+      duration: 2000,
+      isClosable: true,
+    });
+
+    console.log(`Cambiando a modo: ${mode}`);
+  };
+
+  const getGridConfig = (mode) => {
+    switch (mode) {
+      case '2x2':
+        return {
+          templateColumns: '1fr 1fr',
+          templateRows: '1fr 1fr',
+          panelsToShow: 4
+        };
+      case '2x1':
+        return {
+          templateColumns: '1fr 1fr',
+          templateRows: '1fr',
+          panelsToShow: 2
+        };
+      case '1x1':
+        return {
+          templateColumns: '1fr',
+          templateRows: '1fr',
+          panelsToShow: 1
+        };
+      default:
+        return {
+          templateColumns: '1fr 1fr',
+          templateRows: '1fr 1fr',
+          panelsToShow: 4
+        };
+    }
   };
 
   const handleDragStart = (e, bus) => {
@@ -246,174 +337,240 @@ const MonitoringDashboard = () => {
   //   }
   // };
 
+
+  // 7. WRAPPER CON TEMA - Envolver todo el return con:
   return (
-    <DndProvider backend={HTML5Backend}>
-      <Box minH="100vh" bg={bgColor}>
-        {/* Header */}
-        <Flex
-          bg={headerBg}
-          color="white"
-          px={6}
-          py={4}
-          align="center"
-          justify="space-between"
-        >
-          <HStack spacing={4}>
-            <Text fontSize="xl" fontWeight="bold">
-              🚌 Monitoreo GPS y Flota
-            </Text>
-          </HStack>
-
-          <HStack spacing={4}>
-            <Button
-              leftIcon={<Bell size={16} />}
-              colorScheme="red"
-              size="sm"
-              variant="solid"
-            >
-              Centro de Alertas
-            </Button>
-            <Button
-              leftIcon={<User size={16} />}
-              colorScheme="gray"
-              size="sm"
-              variant="solid"
-            >
-              AC
-            </Button>
-          </HStack>
-        </Flex>
-
-        {/* Status Bar */}
-        <Flex bg="white" px={6} py={3} borderBottom="1px" borderColor="gray.200">
-          <HStack spacing={8}>
-            <HStack>
-              <Box w={3} h={3} bg="red.500" borderRadius="full" />
-              <Text fontSize="sm" color="gray.600">3 Alertas Críticas</Text>
+    <ChakraProvider theme={theme}>
+      <DndProvider backend={HTML5Backend}>
+        <Box minH="100vh" bg={bgColor}>
+          {/* Header */}
+          <Flex
+            bg={headerBg}
+            color="white"
+            px={6}
+            py={4}
+            align="center"
+            justify="space-between"
+          >
+            <HStack spacing={4}>
+              <Text fontSize="xl" fontWeight="bold">
+                🚌 Monitoreo GPS y Flota
+              </Text>
             </HStack>
-            <HStack>
-              <Box w={3} h={3} bg="orange.500" borderRadius="full" />
-              <Text fontSize="sm" color="gray.600">7 Advertencias</Text>
-            </HStack>
-            <HStack>
-              <Box w={3} h={3} bg="green.500" borderRadius="full" />
-              <Text fontSize="sm" color="gray.600">85 Unidades Activas</Text>
-            </HStack>
-            <HStack>
-              <Box w={3} h={3} bg="orange.500" borderRadius="full" />
-              <Text fontSize="sm" color="gray.600">5 Con Retraso</Text>
-            </HStack>
-          </HStack>
-        </Flex>
 
-        {/* Main Content */}
-        <Flex h="calc(100vh - 120px)">
-          {/* Left Sidebar - Bus List */}
-          <Box w="320px" bg="white" borderRight="1px" borderColor="gray.200" p={5}>
-            <Text fontSize="lg" fontWeight="600" mb={4}>
-              Unidades Activas
-            </Text>
-
-            <VStack spacing={3} mb={4}>
-              <Input
-                placeholder="Buscar por placa o conductor..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                size="sm"
-                borderRadius="12px"
-                border="2px solid"
-                borderColor="gray.200"
-                _hover={{ borderColor: 'blue.300' }}
-                _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px rgba(66, 153, 225, 0.6)' }}
-              />
-              <MaterialRouteSelector
-                value={routeFilter}
-                onChange={setRouteFilter}
-              />
-            </VStack>
-
-            <Box maxH="500px" overflowY="auto">
-              {filteredBuses.map(bus => (
-                <BusItem
-                  key={bus.id}
-                  bus={bus}
-                  isSelected={selectedBuses.has(bus.id)}
-                  onClick={() => handleBusClick(bus.id)}
-                  onDragStart={(e) => handleDragStart(e, bus)}
-                />
-              ))}
-            </Box>
-          </Box>
-
-          {/* Center - Video Grid */}
-          <Flex flex={1} direction="column" bg="white" p={5}>
-            <HStack mb={4} spacing={4}>
+            <HStack spacing={4}>
               <Button
-                variant="ghost"
+                leftIcon={<Bell size={16} />}
+                colorScheme="red"
                 size="sm"
-                leftIcon={<span>🗺️</span>}
-              >
-                Mapa Central
-              </Button>
-              <Button
                 variant="solid"
-                colorScheme="blue"
-                size="sm"
-                leftIcon={<span>📹</span>}
               >
-                Video Digital
+                Centro de Alertas
+              </Button>
+              <Button
+                leftIcon={<User size={16} />}
+                colorScheme="gray"
+                size="sm"
+                variant="solid"
+              >
+                AC
               </Button>
             </HStack>
-
-            <Grid templateColumns="1fr 1fr" templateRows="1fr 1fr" gap={4} h="100%">
-              {videoPanels.map(panel => (
-                <GridItem key={panel.id}>
-                  <EnhancedCameraPanel
-                    panel={panel}
-                    onDrop={handlePanelDrop}
-                    onClose={handlePanelClose}
-                    onDoubleClick={handlePanelDoubleClick}
-                    onContextMenu={openContextMenu}
-                    isPlaying={playingPanels.has(panel.id)}
-                    isMuted={mutedPanels.has(panel.id)}
-                    onPlayStateChange={handlers.handlePlayStateChange}
-                    onMuteStateChange={handlers.handleMuteStateChange}
-                  />
-                </GridItem>
-              ))}
-            </Grid>
           </Flex>
-        </Flex>
 
-        {/* Camera Selection Modal */}
-        <CameraSelectionModal
-          isOpen={isOpen}
-          onClose={onClose}
-          bus={draggedBus}
-          onCameraSelect={handleCameraSelect}
-        />
+          {/* Status Bar */}
+          <Flex bg="white" px={6} py={3} borderBottom="1px" borderColor="gray.200">
+            <HStack spacing={8}>
+              <HStack>
+                <Box w={3} h={3} bg="red.500" borderRadius="full" />
+                <Text fontSize="sm" color="gray.600">3 Alertas Críticas</Text>
+              </HStack>
+              <HStack>
+                <Box w={3} h={3} bg="orange.500" borderRadius="full" />
+                <Text fontSize="sm" color="gray.600">7 Advertencias</Text>
+              </HStack>
+              <HStack>
+                <Box w={3} h={3} bg="green.500" borderRadius="full" />
+                <Text fontSize="sm" color="gray.600">85 Unidades Activas</Text>
+              </HStack>
+              <HStack>
+                <Box w={3} h={3} bg="orange.500" borderRadius="full" />
+                <Text fontSize="sm" color="gray.600">5 Con Retraso</Text>
+              </HStack>
+            </HStack>
+          </Flex>
 
-        {/* Context Menu */}
-        <ContextMenu
-          isOpen={contextMenu?.isOpen || false}
-          position={contextMenu?.position}
-          panelData={contextMenu?.panelData}
-          onClose={closeContextMenu}
-          onPlay={handlers.handlePlay}
-          onPause={handlers.handlePause}
-          // onClose={handlePanelClose} // Tu función existente
-          onCapture={handlers.handleCapture}
-          onZoom={handlers.handleZoom}
-          onFullscreen={handlers.handleFullscreen}
-          onMute={handlers.handleMute}
-          onUnmute={handlers.handleUnmute}
-          onSettings={handlers.handleSettings}
-          isPlaying={contextMenu ? playingPanels.has(contextMenu.panelData?.id) : false}
-          isMuted={contextMenu ? mutedPanels.has(contextMenu.panelData?.id) : false}
-        />
-      </Box>
-    </DndProvider>
+          {/* Main Content */}
+          <Flex h="calc(100vh - 120px)">
+            {/* Left Sidebar - Bus List */}
+            <Box w="320px" bg="white" borderRight="1px" borderColor="gray.200" p={5}>
+              <Text fontSize="lg" fontWeight="600" mb={4}>
+                Unidades Activas
+              </Text>
+
+              <VStack spacing={3} mb={4}>
+                <Input
+                  placeholder="Buscar por placa o conductor..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  size="sm"
+                  borderRadius="12px"
+                  border="2px solid"
+                  borderColor="gray.200"
+                  _hover={{ borderColor: 'blue.300' }}
+                  _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px rgba(66, 153, 225, 0.6)' }}
+                />
+                <MaterialRouteSelector
+                  value={routeFilter}
+                  onChange={setRouteFilter}
+                />
+              </VStack>
+
+              <Box
+                maxH="500px"
+                overflowY="auto"
+                css={{
+                  '&::-webkit-scrollbar': {
+                    width: '8px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    background: '#f1f5f9',
+                    borderRadius: '10px',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    background: 'linear-gradient(180deg, #cbd5e0 0%, #a0aec0 100%)',
+                    borderRadius: '10px',
+                    border: '2px solid #f1f5f9',
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                    background: 'linear-gradient(180deg, #a0aec0 0%, #718096 100%)',
+                  },
+                }}
+              >
+                {filteredBuses.map(bus => (
+                  <BusItem
+                    key={bus.id}
+                    bus={bus}
+                    isSelected={selectedBuses.has(bus.id)}
+                    onClick={() => handleBusClick(bus.id)}
+                    onDragStart={(e) => handleDragStart(e, bus)}
+                  />
+                ))}
+              </Box>
+            </Box>
+
+            {/* Center - Video Grid */}
+            <Flex flex={1} direction="column" bg="white" p={5}>
+              <Flex mb={4} justify="space-between" align="center">
+                <HStack mb={4} spacing={4}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    leftIcon={<span>🗺️</span>}
+                    color="gray.600"
+                    _hover={{ color: 'primary.600', bg: 'primary.50' }}
+                  >
+                    Mapa Central
+                  </Button>
+                  <Button
+                    variant="videoPrimary"
+                    size="sm"
+                    leftIcon={<span>📹</span>}
+                  >
+                    Video Digital
+                  </Button>
+                </HStack>
+
+                {/* Selector de modo de vista al lado derecho */}
+                <ViewModeSelector
+                  currentMode={globalViewMode}
+                  onModeChange={handleGlobalViewModeChange}
+                />
+              </Flex>
+
+              <Grid
+                templateColumns={
+                  globalViewMode === '1x1' ? '1fr' :
+                    globalViewMode === '2x1' ? '1fr 1fr' :
+                      '1fr 1fr'
+                }
+                templateRows={
+                  globalViewMode === '1x1' ? '1fr' :
+                    globalViewMode === '2x1' ? '1fr' :
+                      '1fr 1fr'
+                }
+                gap={4}
+                h="100%"
+              >
+                {(() => {
+                  let panelsToShow = [];
+
+                  switch (globalViewMode) {
+                    case '1x1':
+                      panelsToShow = [videoPanels[0]];
+                      break;
+                    case '2x1':
+                      panelsToShow = videoPanels.slice(0, 2);
+                      break;
+                    case '2x2':
+                    default:
+                      panelsToShow = videoPanels;
+                      break;
+                  }
+
+                  return panelsToShow.map(currentPanel => (
+                    <GridItem key={currentPanel.id}>
+                      <EnhancedCameraPanel
+                        panel={currentPanel}
+                        onDrop={handlePanelDrop}
+                        onClose={handlePanelClose}
+                        onDoubleClick={handlePanelDoubleClick}
+                        onContextMenu={openContextMenu}
+                        isPlaying={playingPanels.has(currentPanel.id)}
+                        isMuted={mutedPanels.has(currentPanel.id)}
+                        onPlayStateChange={handlers.handlePlayStateChange}
+                        onMuteStateChange={handlers.handleMuteStateChange}
+                      />
+                    </GridItem>
+                  ));
+                })()}
+              </Grid>
+
+
+            </Flex>
+          </Flex>
+
+          {/* Camera Selection Modal */}
+          <CameraSelectionModal
+            isOpen={isOpen}
+            onClose={onClose}
+            bus={draggedBus}
+            onCameraSelect={handleCameraSelect}
+          />
+
+          {/* Context Menu */}
+          <ContextMenu
+            isOpen={contextMenu?.isOpen || false}
+            position={contextMenu?.position}
+            panelData={contextMenu?.panelData}
+            onClose={closeContextMenu}
+            onPlay={handlers.handlePlay}
+            onPause={handlers.handlePause}
+            // onClose={handlePanelClose} // Tu función existente
+            onCapture={handlers.handleCapture}
+            onZoom={handlers.handleZoom}
+            onFullscreen={handlers.handleFullscreen}
+            onMute={handlers.handleMute}
+            onUnmute={handlers.handleUnmute}
+            onSettings={handlers.handleSettings}
+            isPlaying={contextMenu ? playingPanels.has(contextMenu.panelData?.id) : false}
+            isMuted={contextMenu ? mutedPanels.has(contextMenu.panelData?.id) : false}
+          />
+        </Box>
+      </DndProvider>
+    </ChakraProvider>
   );
+
 };
 
 export default MonitoringDashboard;

@@ -1,37 +1,90 @@
+// src/theme.js - Actualización con colores primarios
 import { extendTheme } from '@chakra-ui/react';
 
 const theme = extendTheme({
   colors: {
-    brand: {
-      50: '#e3f2fd',
-      100: '#bbdefb',
-      200: '#90caf9',
-      300: '#64b5f6',
-      400: '#42a5f5',
-      500: '#2196f3',
-      600: '#1e88e5',
-      700: '#1976d2',
-      800: '#1565c0',
-      900: '#0d47a1',
+    primary: {
+      50: '#f0f9ff',
+      100: '#e0f2fe',
+      200: '#bae6fd',
+      300: '#7dd3fc',
+      400: '#38bdf8',
+      500: '#0ea5e9', // Color primario principal
+      600: '#0284c7',
+      700: '#0369a1',
+      800: '#075985', // Dark primary
+      900: '#0c4a6e',
     },
-    status: {
-      active: '#4caf50',
-      warning: '#ff9800',
-      critical: '#f44336',
-      delay: '#9c27b0',
+    gray: {
+      800: '#2d3748', // Mantenemos consistencia con Chakra
     }
-  },
-  fonts: {
-    heading: 'Inter, system-ui, sans-serif',
-    body: 'Inter, system-ui, sans-serif',
   },
   components: {
     Button: {
-      defaultProps: {
-        colorScheme: 'brand',
-      },
+      variants: {
+        solid: {
+          bg: 'primary.500',
+          color: 'white',
+          _hover: {
+            bg: 'primary.600',
+          },
+          _active: {
+            bg: 'primary.700',
+          },
+        },
+        videoPrimary: {
+          bg: 'primary.800',
+          color: 'white',
+          _hover: {
+            bg: 'primary.700',
+          },
+          _active: {
+            bg: 'primary.600',
+          },
+        }
+      }
     },
+    // Customización del scrollbar
+    '.custom-scrollbar': {
+      '&::-webkit-scrollbar': {
+        width: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: '#f1f5f9',
+        borderRadius: '10px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: 'linear-gradient(180deg, #cbd5e0 0%, #a0aec0 100%)',
+        borderRadius: '10px',
+        border: '2px solid #f1f5f9',
+      },
+      '&::-webkit-scrollbar-thumb:hover': {
+        background: 'linear-gradient(180deg, #a0aec0 0%, #718096 100%)',
+      },
+    }
   },
+  styles: {
+    global: {
+      // Scrollbar global styles
+      '*': {
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: '#f1f5f9',
+          borderRadius: '10px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: 'linear-gradient(180deg, #cbd5e0 0%, #a0aec0 100%)',
+          borderRadius: '10px',
+          border: '2px solid #f1f5f9',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          background: 'linear-gradient(180deg, #a0aec0 0%, #718096 100%)',
+        },
+      }
+    }
+  }
 });
 
 export default theme;
