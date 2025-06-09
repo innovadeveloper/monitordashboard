@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Monitoreo GPS y Flota</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@chakra-ui/react@2.8.2/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@emotion/react@11.11.1/dist/emotion-react.umd.min.js"></script>
+    <script src="https://unpkg.com/@emotion/styled@11.11.0/dist/emotion-styled.umd.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+        }
+        
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(3deg);
+        }
+        
+        .drop-zone-active {
+            border: 3px dashed #3498db !important;
+            background: rgba(52, 152, 219, 0.1) !important;
+        }
+        
+        .camera-panel {
+            position: relative;
+            background: #2c3e50;
+            border-radius: 8px;
+            min-height: 200px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .camera-panel.empty {
+            background: #ecf0f1;
+            border: 2px dashed #95a5a6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+        }
+        
+        .camera-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .camera-label {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-live {
+            background: #27ae60;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .camera-controls {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .control-btn {
+            width: 30px;
+            height: 30px;
+            background: rgba(0,0,0,0.7);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0,0,0,0.9);
+            transform: scale(1.1);
+        }
+        
+        .camera-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            opacity: 0.3;
+            color: white;
+        }
+        
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 180px;
+            padding: 8px 0;
+        }
+        
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #2d3748;
+            transition: background 0.2s;
+        }
+        
+        .context-menu-item:hover {
+            background: #f7fafc;
+        }
+        
+        .bus-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            background: white;
+            user-select: none;
+        }
+        
+        .bus-item:hover {
+            border-color: #3498db;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .bus-item.selected {
+            border-color: #3498db;
+            background: #f8fafe;
+        }
+        
+        .bus-item.dragging {
+            opacity: 0.5;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+        }
+        
+        .status-active { background: #27ae60; }
+        .status-warning { background: #f39c12; }
+        .status-error { background: #e74c3c; }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { ChakraProvider, Box, Flex, Text, Button, Input, Select, VStack, HStack, Badge, 
+                Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton,
+                useDisclosure, Grid, GridItem, IconButton, Avatar, Spacer } = window.ChakraUI;
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // Mock data
+        const mockBuses = [
+            { id: "BUS-1565", conductor: "Juan Pérez", tiempo: "08:34 AM", ruta: "Ruta 1 → Terminal Norte", estado: "active", alertas: 0 },
+            { id: "BUS-1357", conductor: "María González", tiempo: "08:22 AM", ruta: "Ruta 2 → Con retraso", estado: "warning", alertas: 1 },
+            { id: "BUS-2535", conductor: "Carlos López", tiempo: "08:15 AM", ruta: "Ruta 3 → Fuera de ruta", estado: "error", alertas: 3 },
+            { id: "BUS-7943", conductor: "Ana Torres", tiempo: "08:18 AM", ruta: "Ruta 1 → En tiempo", estado: "active", alertas: 0 },
+            { id: "BUS-7054", conductor: "Roberto Silva", tiempo: "08:43 AM", ruta: "Ruta 2 → Velocidad alta", estado: "warning", alertas: 1 }
+        ];
+
+        const cameraTypes = {
+            interior: { icon: "📹", label: "Cámara Interior" },
+            frontal: { icon: "🎥", label: "Cámara Frontal" },
+            lateral: { icon: "📸", label: "Cámara Lateral" },
+            dashboard: { icon: "🚗", label: "Cámara Dashboard" }
+        };
+
+        const BusItem = ({ bus, onDragStart, onDragEnd, isSelected, onClick, onContextMenu }) => {
+            const getStatusColor = (estado) => {
+                switch(estado) {
+                    case 'active': return 'status-active';
+                    case 'warning': return 'status-warning';
+                    case 'error': return 'status-error';
+                    default: return 'status-active';
+                }
+            };
+
+            return (
+                <div 
+                    className={`bus-item ${isSelected ? 'selected' : ''}`}
+                    draggable
+                    onDragStart={(e) => onDragStart(e, bus)}
+                    onDragEnd={onDragEnd}
+                    onClick={() => onClick(bus.id)}
+                    onContextMenu={(e) => onContextMenu(e, bus)}
+                    style={{ position: 'relative' }}
+                >
+                    <div className={`status-indicator ${getStatusColor(bus.estado)}`}></div>
+                    <Text fontWeight="600" color="#2c3e50" mb={1}>{bus.id}</Text>
+                    <Text fontSize="12px" color="#7f8c8d" mb={1}>{bus.conductor} • {bus.tiempo}</Text>
+                    <Text fontSize="11px" color="#95a5a6">{bus.ruta}</Text>
+                    {bus.alertas > 0 && (
+                        <Badge colorScheme="red" position="absolute" top="2" right="25px" fontSize="9px">
+                            {bus.alertas}
+                        </Badge>
+                    )}
+                </div>
+            );
+        };
+
+        const CameraPanel = ({ id, camera, onDrop, onDoubleClick, onContextMenu, onControlClick }) => {
+            const [dragOver, setDragOver] = useState(false);
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                setDragOver(true);
+            };
+
+            const handleDragLeave = () => {
+                setDragOver(false);
+            };
+
+            const handleDrop = (e) => {
+                e.preventDefault();
+                setDragOver(false);
+                const busData = JSON.parse(e.dataTransfer.getData('application/json'));
+                onDrop(id, busData);
+            };
+
+            return (
+                <div 
+                    className={`camera-panel ${!camera ? 'empty' : ''} ${dragOver ? 'drop-zone-active' : ''}`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onDoubleClick={() => onDoubleClick(id)}
+                    onContextMenu={(e) => onContextMenu(e, id, camera)}
+                >
+                    {camera ? (
+                        <>
+                            <div className="camera-overlay">
+                                <span className="camera-label">{camera.busId} - {camera.type}</span>
+                                <span className="status-live">VIVO</span>
+                            </div>
+                            <div className="camera-icon">
+                                {cameraTypes[camera.cameraType]?.icon || "📹"}
+                            </div>
+                            <div className="camera-controls">
+                                <button 
+                                    className="control-btn" 
+                                    onClick={() => onControlClick('record', id)}
+                                    title="Grabar"
+                                >🔴</button>
+                                <button 
+                                    className="control-btn" 
+                                    onClick={() => onControlClick('capture', id)}
+                                    title="Capturar"
+                                >📷</button>
+                                <button 
+                                    className="control-btn" 
+                                    onClick={() => onControlClick('zoom', id)}
+                                    title="Zoom"
+                                >🔍</button>
+                                <button 
+                                    className="control-btn" 
+                                    onClick={() => onControlClick('close', id)}
+                                    title="Cerrar"
+                                >✕</button>
+                            </div>
+                        </>
+                    ) : (
+                        <Text color="#7f8c8d" fontSize="14px">📹 Arrastra un bus aquí</Text>
+                    )}
+                </div>
+            );
+        };
+
+        const CameraSelectionModal = ({ isOpen, onClose, bus, onCameraSelect }) => {
+            return (
+                <Modal isOpen={isOpen} onClose={onClose} isCentered>
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>📹 Seleccionar Cámara</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody>
+                            {bus && (
+                                <VStack spacing={4}>
+                                    <Text fontSize="lg" fontWeight="600">{bus.id}</Text>
+                                    <Text color="gray.600">{bus.conductor}</Text>
+                                    <HStack spacing={4} w="100%">
+                                        <Button 
+                                            flex={1} 
+                                            onClick={() => onCameraSelect('frontal')}
+                                            colorScheme="blue"
+                                            variant="outline"
+                                        >
+                                            📷 Frontal
+                                        </Button>
+                                        <Button 
+                                            flex={1} 
+                                            onClick={() => onCameraSelect('posterior')}
+                                            colorScheme="blue"
+                                            variant="outline"
+                                        >
+                                            📷 Posterior
+                                        </Button>
+                                    </HStack>
+                                </VStack>
+                            )}
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+            );
+        };
+
+        const ContextMenu = ({ position, items, onClose, onItemClick }) => {
+            const menuRef = useRef();
+
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (menuRef.current && !menuRef.current.contains(event.target)) {
+                        onClose();
+                    }
+                };
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, [onClose]);
+
+            if (!position) return null;
+
+            return (
+                <div 
+                    ref={menuRef}
+                    className="context-menu"
+                    style={{ 
+                        left: position.x, 
+                        top: position.y 
+                    }}
+                >
+                    {items.map((item, index) => (
+                        <div 
+                            key={index}
+                            className="context-menu-item"
+                            onClick={() => {
+                                onItemClick(item.action);
+                                onClose();
+                            }}
+                        >
+                            {item.label}
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const Notification = ({ message, type, show }) => {
+            return (
+                <div className={`notification ${show ? 'show' : ''}`}>
+                    <Text fontSize="14px" color={type === 'error' ? '#e74c3c' : type === 'success' ? '#27ae60' : '#3498db'}>
+                        {message}
+                    </Text>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [buses] = useState(mockBuses);
+            const [filteredBuses, setFilteredBuses] = useState(mockBuses);
+            const [selectedBuses, setSelectedBuses] = useState(new Set());
+            const [cameras, setCameras] = useState({});
+            const [searchTerm, setSearchTerm] = useState('');
+            const [routeFilter, setRouteFilter] = useState('all');
+            const [selectedPanel, setSelectedPanel] = useState(null);
+            const [pendingConnection, setPendingConnection] = useState(null);
+            const [contextMenu, setContextMenu] = useState(null);
+            const [notification, setNotification] = useState({ show: false, message: '', type: 'info' });
+            
+            const { isOpen: isCameraModalOpen, onOpen: onCameraModalOpen, onClose: onCameraModalClose } = useDisclosure();
+
+            const showNotification = useCallback((message, type = 'info') => {
+                setNotification({ show: true, message, type });
+                setTimeout(() => setNotification({ show: false, message: '', type: 'info' }), 3000);
+            }, []);
+
+            useEffect(() => {
+                let filtered = buses;
+                
+                if (searchTerm) {
+                    filtered = filtered.filter(bus => 
+                        bus.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        bus.conductor.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                }
+                
+                if (routeFilter !== 'all') {
+                    filtered = filtered.filter(bus => 
+                        bus.ruta.toLowerCase().includes(routeFilter.toLowerCase())
+                    );
+                }
+                
+                setFilteredBuses(filtered);
+            }, [searchTerm, routeFilter, buses]);
+
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.key >= 'F1' && e.key <= 'F4') {
+                        e.preventDefault();
+                        const panelId = parseInt(e.key.slice(1)) - 1;
+                        setSelectedPanel(panelId);
+                        showNotification(`Panel ${panelId + 1} seleccionado`);
+                    } else if (e.key === 'r' || e.key === 'R') {
+                        if (selectedPanel !== null && cameras[selectedPanel]) {
+                            handleControlClick('record', selectedPanel);
+                        }
+                    } else if (e.key === 'c' || e.key === 'C') {
+                        if (selectedPanel !== null && cameras[selectedPanel]) {
+                            handleControlClick('capture', selectedPanel);
+                        }
+                    } else if (e.key === 'Escape') {
+                        setSelectedPanel(null);
+                        setContextMenu(null);
+                    }
+                };
+
+                document.addEventListener('keydown', handleKeyDown);
+                return () => document.removeEventListener('keydown', handleKeyDown);
+            }, [selectedPanel, cameras, showNotification]);
+
+            const handleDragStart = (e, bus) => {
+                e.dataTransfer.setData('application/json', JSON.stringify(bus));
+                e.target.classList.add('dragging');
+            };
+
+            const handleDragEnd = (e) => {
+                e.target.classList.remove('dragging');
+            };
+
+            const handlePanelDrop = (panelId, bus) => {
+                setPendingConnection({ panelId, bus });
+                onCameraModalOpen();
+            };
+
+            const handleCameraSelect = (cameraType) => {
+                if (pendingConnection) {
+                    const { panelId, bus } = pendingConnection;
+                    setCameras(prev => ({
+                        ...prev,
+                        [panelId]: {
+                            busId: bus.id,
+                            type: cameraTypes[cameraType]?.label || 'Cámara',
+                            cameraType: cameraType
+                        }
+                    }));
+                    showNotification(`Cámara ${cameraType} conectada para ${bus.id}`, 'success');
+                    setPendingConnection(null);
+                }
+                onCameraModalClose();
+            };
+
+            const handlePanelDoubleClick = (panelId) => {
+                // Implementar selector rápido de bus
+                showNotification('Selector rápido de bus - Por implementar');
+            };
+
+            const handleBusClick = (busId) => {
+                setSelectedBuses(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(busId)) {
+                        newSet.delete(busId);
+                    } else {
+                        newSet.add(busId);
+                    }
+                    return newSet;
+                });
+            };
+
+            const handleContextMenu = (e, panelId, camera) => {
+                e.preventDefault();
+                const items = camera ? [
+                    { label: '🔄 Cambiar cámara', action: 'change' },
+                    { label: '🔴 Grabar', action: 'record' },
+                    { label: '📷 Capturar', action: 'capture' },
+                    { label: '🖥️ Pantalla completa', action: 'fullscreen' },
+                    { label: '❌ Desconectar', action: 'disconnect' }
+                ] : [
+                    { label: '➕ Agregar cámara', action: 'add' }
+                ];
+
+                setContextMenu({
+                    position: { x: e.clientX, y: e.clientY },
+                    items,
+                    panelId,
+                    camera
+                });
+            };
+
+            const handleContextMenuAction = (action) => {
+                const { panelId } = contextMenu;
+                switch(action) {
+                    case 'disconnect':
+                        setCameras(prev => {
+                            const newCameras = { ...prev };
+                            delete newCameras[panelId];
+                            return newCameras;
+                        });
+                        showNotification('Cámara desconectada', 'info');
+                        break;
+                    case 'record':
+                        handleControlClick('record', panelId);
+                        break;
+                    case 'capture':
+                        handleControlClick('capture', panelId);
+                        break;
+                    case 'fullscreen':
+                        showNotification('Modo pantalla completa activado');
+                        break;
+                    default:
+                        showNotification(`Acción ${action} ejecutada`);
+                }
+                setContextMenu(null);
+            };
+
+            const handleControlClick = (action, panelId) => {
+                const camera = cameras[panelId];
+                if (!camera) return;
+
+                switch(action) {
+                    case 'record':
+                        showNotification(`Grabación iniciada - ${camera.busId}`, 'success');
+                        break;
+                    case 'capture':
+                        showNotification(`Captura tomada - ${camera.busId}`, 'success');
+                        break;
+                    case 'zoom':
+                        showNotification(`Zoom activado - ${camera.busId}`);
+                        break;
+                    case 'close':
+                        setCameras(prev => {
+                            const newCameras = { ...prev };
+                            delete newCameras[panelId];
+                            return newCameras;
+                        });
+                        showNotification(`Cámara cerrada - ${camera.busId}`, 'info');
+                        break;
+                }
+            };
+
+            return (
+                <ChakraProvider>
+                    <Box h="100vh" bg="#f0f2f5">
+                        {/* Header */}
+                        <Box bg="linear-gradient(90deg, #2c3e50 0%, #3498db 100%)" color="white" p={4}>
+                            <Flex align="center">
+                                <Text fontSize="xl" fontWeight="600">🚌 Monitoreo GPS y Flota</Text>
+                                <Spacer />
+                                <Button colorScheme="red" size="sm" mr={4}>Centro de Alertas</Button>
+                                <Avatar size="sm" name="AC" bg="#95a5a6" />
+                            </Flex>
+                        </Box>
+
+                        {/* Status Bar */}
+                        <Box bg="white" p={4} borderBottom="1px" borderColor="#e2e8f0">
+                            <HStack spacing={6}>
+                                <HStack>
+                                    <Box w="3px" h="6" bg="#e74c3c" />
+                                    <Text fontSize="sm">3 Alertas Críticas</Text>
+                                </HStack>
+                                <HStack>
+                                    <Box w="3px" h="6" bg="#f39c12" />
+                                    <Text fontSize="sm">7 Advertencias</Text>
+                                </HStack>
+                                <HStack>
+                                    <Box w="3px" h="6" bg="#27ae60" />
+                                    <Text fontSize="sm">85 Unidades Activas</Text>
+                                </HStack>
+                                <HStack>
+                                    <Box w="3px" h="6" bg="#f39c12" />
+                                    <Text fontSize="sm">5 Con Retraso</Text>
+                                </HStack>
+                            </HStack>
+                        </Box>
+
+                        {/* Main Content */}
+                        <Flex h="calc(100vh - 140px)" p={6} gap={6}>
+                            {/* Left Panel - Bus List */}
+                            <Box w="350px" bg="white" borderRadius="12px" boxShadow="0 4px 20px rgba(0,0,0,0.08)" p={5}>
+                                <Text fontSize="lg" fontWeight="600" mb={4}>Unidades Activas</Text>
+                                
+                                <VStack spacing={3} mb={4}>
+                                    <Input 
+                                        placeholder="Buscar por placa o conductor..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    <Select 
+                                        value={routeFilter}
+                                        onChange={(e) => setRouteFilter(e.target.value)}
+                                    >
+                                        <option value="all">Todas las rutas</option>
+                                        <option value="ruta 1">Ruta 1 - Centro</option>
+                                        <option value="ruta 2">Ruta 2 - Norte</option>
+                                        <option value="ruta 3">Ruta 3 - Sur</option>
+                                    </Select>
+                                </VStack>
+
+                                <Box maxH="500px" overflowY="auto">
+                                    {filteredBuses.map(bus => (
+                                        <BusItem
+                                            key={bus.id}
+                                            bus={bus}
+                                            onDragStart={handleDragStart}
+                                            onDragEnd={handleDragEnd}
+                                            isSelected={selectedBuses.has(bus.id)}
+                                            onClick={handleBusClick}
+                                            onContextMenu={() => {}}
+                                        />
+                                    ))}
+                                </Box>
+                            </Box>
+
+                            {/* Center Panel - Video Grid */}
+                            <Box flex={1} bg="white" borderRadius="12px" boxShadow="0 4px 20px rgba(0,0,0,0.08)" p={5}>
+                                <Flex justify="space-between" align="center" mb={4}>
+                                    <HStack>
+                                        <Button variant="ghost" size="sm">🗺️ Mapa Central</Button>
+                                        <Button variant="solid" colorScheme="blue" size="sm">📹 Video Digital</Button>
+                                    </HStack>
+                                </Flex>
+
+                                <Grid templateColumns="1fr 1fr" templateRows="1fr 1fr" gap={4} h="calc(100% - 60px)">
+                                    {[0, 1, 2, 3].map(panelId => (
+                                        <GridItem key={panelId}>
+                                            <CameraPanel
+                                                id={panelId}
+                                                camera={cameras[panelId]}
+                                                onDrop={handlePanelDrop}
+                                                onDoubleClick={handlePanelDoubleClick}
+                                                onContextMenu={handleContextMenu}
+                                                onControlClick={handleControlClick}
+                                            />
+                                        </GridItem>
+                                    ))}
+                                </Grid>
+                            </Box>
+
+                            {/* Right Panel - Details */}
+                            <Box w="300px" bg="white" borderRadius="12px" boxShadow="0 4px 20px rgba(0,0,0,0.08)" p={5}>
+                                <Text fontSize="lg" fontWeight="600" mb={4}>BUS-1565</Text>
+                                <Text color="gray.600" mb={6}>Juan Pérez - Turno Mañana</Text>
+
+                                <Grid templateColumns="1fr 1fr" gap={4} mb={6}>
+                                    <Box bg="#f8f9fa" p={4} borderRadius="8px" textAlign="center">
+                                        <Text fontSize="xl" fontWeight="600" color="#2c3e50">62.5</Text>
+                                        <Text fontSize="xs" color="#7f8c8d">KM/H</Text>
+                                    </Box>
+                                    <Box bg="#f8f9fa" p={4} borderRadius="8px" textAlign="center">
+                                        <Text fontSize="xl" fontWeight="600" color="#2c3e50">6.03</Text>
+                                        <Text fontSize="xs" color="#7f8c8d">L/100KM</Text>
+                                    </Box>
+                                    <Box bg="#f8f9fa" p={4} borderRadius="8px" textAlign="center">
+                                        <Text fontSize="xl" fontWeight="600" color="#2c3e50">750</Text>
+                                        <Text fontSize="xs" color="#7f8c8d">KM HOY</Text>
+                                    </Box>
+                                    <Box bg="#f8f9fa" p={4} borderRadius="8px" textAlign="center">
+                                        <Text fontSize="xl" fontWeight="600" color="#2c3e50">12h</Text>
+                                        <Text fontSize="xs" color="#7f8c8d">EN RUTA</Text>
+                                    </Box>
+                                </Grid>
+
+                                <VStack spacing={3}>
+                                    <Text fontWeight="600" alignSelf="start">Comunicación</Text>
+                                    <Button w="100%" colorScheme="green">🎤 Llamar</Button>
+                                    <Button w="100%" colorScheme="blue">📢 Mensaje TTS</Button>
+                                    <Button w="100%" colorScheme="orange">📷 Solicitar Foto</Button>
+                                </VStack>
+
+                                <Box bg="#f8f9fa" p={4} borderRadius="8px" mt={6}>
+                                    <Text fontWeight="600" mb={2}>Estado Actual</Text>
+                                    <Text color="#27ae60" fontSize="sm" mb={1}>✅ En Ruta Normal</Text>
+                                    <Text color="#7f8c8d" fontSize="xs">Próximo: Paradero Plaza Mayor</Text>
+                                    <Text color="#7f8c8d" fontSize="xs">ETA: 3 min</Text>
+                                </Box>
+
+                                <Box mt={6}>
+                                    <Text fontWeight="600" mb={3}>📷 Fotos Recientes</Text>
+                                    <HStack spacing={3}>
+                                        <Box w="80px" h="60px" bg="#e74c3c" borderRadius="6px" display="flex" alignItems="center" justifyContent="center" cursor="pointer">
+                                            <Text color="white" fontSize="16px">📷</Text>
+                                        </Box>
+                                        <Box w="80px" h="60px" bg="#27ae60" borderRadius="6px" display="flex" alignItems="center" justifyContent="center" cursor="pointer">
+                                            <Text color="white" fontSize="16px">🚌</Text>
+                                        </Box>
+                                        <Box w="80px" h="60px" bg="#3498db" borderRadius="6px" display="flex" alignItems="center" justifyContent="center" cursor="pointer">
+                                            <Text color="white" fontSize="16px">🛣️</Text>
+                                        </Box>
+                                    </HStack>
+                                </Box>
+                            </Box>
+                        </Flex>
+
+                        {/* Camera Selection Modal */}
+                        <CameraSelectionModal
+                            isOpen={isCameraModalOpen}
+                            onClose={onCameraModalClose}
+                            bus={pendingConnection?.bus}
+                            onCameraSelect={handleCameraSelect}
+                        />
+
+                        {/* Context Menu */}
+                        <ContextMenu
+                            position={contextMenu?.position}
+                            items={contextMenu?.items || []}
+                            onClose={() => setContextMenu(null)}
+                            onItemClick={handleContextMenuAction}
+                        />
+
+                        {/* Notification */}
+                        <Notification
+                            message={notification.message}
+                            type={notification.type}
+                            show={notification.show}
+                        />
+                    </Box>
+                </ChakraProvider>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
