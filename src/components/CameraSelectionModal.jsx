@@ -1,109 +1,92 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
+  Box,
+  Flex,
+  Text,
+  HStack,
+  VStack,
+  Input,
+  Button,
+  Badge,
+  Grid,
+  GridItem,
+  IconButton,
+  useToast,
+  useDisclosure,
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
   ModalBody,
+  ModalFooter,
   ModalCloseButton,
-  Grid,
-  Box,
-  Text,
-  VStack,
-  Center,
   useColorModeValue,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Portal,
+  Divider,
 } from '@chakra-ui/react';
-import { Video, Camera, Car, Monitor } from 'lucide-react';
+import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin, Route, Navigation } from 'lucide-react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
-const cameraTypes = [
-  {
-    id: 'frontal',
-    name: 'Cámara Frontal',
-    icon: Video,
-    description: 'Vista frontal del vehículo'
-  },
-  {
-    id: 'interior',
-    name: 'Cámara Interior',
-    icon: Camera,
-    description: 'Vista interior del bus'
-  },
-  {
-    id: 'lateral',
-    name: 'Cámara Lateral',
-    icon: Video,
-    description: 'Vista lateral del vehículo'
-  },
-  {
-    id: 'dashboard',
-    name: 'Cámara Dashboard',
-    icon: Monitor,
-    description: 'Vista del tablero'
-  },
-];
-
+// Camera Selection Modal
 const CameraSelectionModal = ({ isOpen, onClose, bus, onCameraSelect }) => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const hoverBg = useColorModeValue('gray.50', 'gray.700');
+  const cameraOptions = [
+    { type: 'frontal', label: 'Cámara Frontal', description: 'Vista frontal del vehículo', icon: '📹' },
+    { type: 'interior', label: 'Cámara Interior', description: 'Vista interior del bus', icon: '📷' },
+    { type: 'lateral', label: 'Cámara Lateral', description: 'Vista lateral del vehículo', icon: '📹' },
+    { type: 'dashboard', label: 'Cámara Dashboard', description: 'Vista del tablero', icon: '🖥️' }
+  ];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
-      <ModalOverlay bg="blackAlpha.600" />
-      <ModalContent bg={bgColor} borderRadius="xl">
-        <ModalHeader>
-          <VStack align="start" spacing={1}>
-            <Text fontSize="lg" fontWeight="bold">
-              Seleccionar Cámara
-            </Text>
-            {bus && (
-              <Text fontSize="sm" color="gray.500">
-                {bus.id} - {bus.driver}
-              </Text>
-            )}
-          </VStack>
-        </ModalHeader>
+    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Seleccionar Cámara</ModalHeader>
         <ModalCloseButton />
-        <ModalBody pb={6}>
-          <Grid templateColumns="1fr 1fr" gap={4}>
-            {cameraTypes.map((camera) => {
-              const IconComponent = camera.icon;
-              return (
-                <Box
-                  key={camera.id}
-                  p={4}
-                  border="2px"
-                  borderColor="gray.200"
-                  borderRadius="lg"
-                  cursor="pointer"
-                  transition="all 0.2s"
-                  _hover={{
-                    borderColor: 'blue.400',
-                    bg: hoverBg,
-                    transform: 'translateY(-2px)',
-                    boxShadow: 'md',
-                  }}
-                  onClick={() => onCameraSelect(camera.id)}
-                >
-                  <Center>
-                    <VStack spacing={3}>
-                      <Box color="blue.500">
-                        <IconComponent size={32} />
-                      </Box>
-                      <VStack spacing={1}>
-                        <Text fontSize="sm" fontWeight="medium" textAlign="center">
-                          {camera.name}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500" textAlign="center">
-                          {camera.description}
-                        </Text>
-                      </VStack>
-                    </VStack>
-                  </Center>
-                </Box>
-              );
-            })}
-          </Grid>
+        <ModalBody>
+          {bus && (
+            <VStack spacing={4}>
+              <Text fontSize="lg" fontWeight="600" color="blue.600">
+                {bus.id} - {bus.conductor}
+              </Text>
+
+              <Grid templateColumns="1fr 1fr" gap={4} w="100%">
+                {cameraOptions.map((camera) => (
+                  <Box
+                    key={camera.type}
+                    p={4}
+                    border="2px"
+                    borderColor="gray.200"
+                    borderRadius="lg"
+                    cursor="pointer"
+                    textAlign="center"
+                    transition="all 0.2s"
+                    _hover={{
+                      borderColor: 'blue.500',
+                      bg: 'blue.50'
+                    }}
+                    onClick={() => onCameraSelect(camera.type)}
+                  >
+                    <Text fontSize="2xl" mb={2}>{camera.icon}</Text>
+                    <Text fontWeight="600" mb={1}>{camera.label}</Text>
+                    <Text fontSize="xs" color="gray.600">
+                      {camera.description}
+                    </Text>
+                  </Box>
+                ))}
+              </Grid>
+            </VStack>
+          )}
         </ModalBody>
+        <ModalFooter>
+          <Button variant="ghost" onClick={onClose}>
+            Cancelar
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );
