@@ -48,6 +48,7 @@ import MaterialRouteSelector from './MaterialRouteSelector';
 import BusItem from './BusItem';
 import CameraSelectionModal from './CameraSelectionModal';
 import MensajeTTSModal from './MensajeTTSModal';
+import RecentPictureModal from './RecentPictureModal';
 import CallWebRTCModal from './CallWebRTCModal';
 import TakePictureModal from './TakePictureModal';
 import LeafletMap from './LeafletMap';
@@ -185,7 +186,9 @@ const MonitoringDashboard = () => {
   const { isOpen: isTTSModalOpen, onOpen: onTTSModalOpen, onClose: onTTSModalClose } = useDisclosure();
   const { isOpen: isCallModalOpen, onOpen: onCallModalOpen, onClose: onCallModalClose } = useDisclosure();
   const { isOpen: isPictureModalOpen, onOpen: onPictureModalOpen, onClose: onPictureModalClose } = useDisclosure();
+  const { isOpen: isRecentPictureModalOpen, onOpen: onRecentPictureModalOpen, onClose: onRecentPictureModalClose } = useDisclosure();
   const [selectedBusForTTS, setSelectedBusForTTS] = useState(null);
+  const [selectedPhotoData, setSelectedPhotoData] = useState(null);
   const [selectedBusForCall, setSelectedBusForCall] = useState(null);
   const [selectedBusForPicture, setSelectedBusForPicture] = useState(null);
   const toast = useToast();
@@ -429,6 +432,31 @@ const MonitoringDashboard = () => {
     }
   };
 
+  // Modal photo navigation functions
+  const handleModalPrevPhoto = () => {
+    if (selectedPhotoData && selectedPhotoData.totalPhotos > 1) {
+      const newIndex = (selectedPhotoData.photoIndex - 1 + selectedPhotoData.totalPhotos) % selectedPhotoData.totalPhotos;
+      setSelectedPhotoData({
+        ...selectedPhotoData,
+        photoIndex: newIndex,
+        imageUrl: selectedPhotoData.bus.fotos[newIndex]
+      });
+      setCurrentPhotoIndex(newIndex);
+    }
+  };
+
+  const handleModalNextPhoto = () => {
+    if (selectedPhotoData && selectedPhotoData.totalPhotos > 1) {
+      const newIndex = (selectedPhotoData.photoIndex + 1) % selectedPhotoData.totalPhotos;
+      setSelectedPhotoData({
+        ...selectedPhotoData,
+        photoIndex: newIndex,
+        imageUrl: selectedPhotoData.bus.fotos[newIndex]
+      });
+      setCurrentPhotoIndex(newIndex);
+    }
+  };
+
   const getGridConfig = (mode) => {
     switch (mode) {
       case '2x2':
@@ -649,9 +677,22 @@ const MonitoringDashboard = () => {
             >
               {!isSidebarCollapsed && (
                 <>
-                  <Text fontSize="lg" fontWeight="600" mb={4} color={useColorModeValue('gray.800', 'app.text.primary')}>
-                    Unidades Activas
-                  </Text>
+                  <Flex justify="space-between" align="center" mb={4}>
+                    <Text fontSize="lg" fontWeight="600" color={useColorModeValue('gray.800', 'app.text.primary')}>
+                      Unidades Activas
+                    </Text>
+                    <IconButton
+                      icon={<ChevronLeft size={16} />}
+                      onClick={toggleSidebar}
+                      size="sm"
+                      variant="ghost"
+                      color={useColorModeValue('gray.600', 'gray.400')}
+                      _hover={{
+                        bg: useColorModeValue('gray.100', 'gray.600')
+                      }}
+                      aria-label="Minimizar sidebar"
+                    />
+                  </Flex>
 
                   <VStack spacing={3} mb={4}>
                     <Input
@@ -720,40 +761,42 @@ const MonitoringDashboard = () => {
               )}
             </Box>
 
-            {/* Sidebar Toggle Button */}
-            <Box
-              position="absolute"
-              left={isSidebarCollapsed ? "10px" : "310px"}
-              top="20px"
-              zIndex="10"
-              transition="all 0.3s ease-in-out"
-            >
-              <IconButton
-                icon={isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-                onClick={toggleSidebar}
-                bg="white"
-                color="gray.600"
-                border="1px solid"
-                borderColor="gray.200"
-                borderRadius="full"
-                size="sm"
-                _hover={{
-                  bg: 'primary.50',
-                  color: 'primary.600',
-                  borderColor: 'primary.300',
-                  transform: 'scale(1.05)'
-                }}
-                _active={{ transform: 'scale(0.95)' }}
-                boxShadow="md"
-                transition="all 0.2s"
-                aria-label={isSidebarCollapsed ? "Expandir sidebar" : "Minimizar sidebar"}
-              />
-            </Box>
+            {/* Sidebar Toggle Button - Solo visible cuando el sidebar está cerrado */}
+            {isSidebarCollapsed && (
+              <Box
+                position="absolute"
+                left="10px"
+                top="20px"
+                zIndex="10"
+                transition="all 0.3s ease-in-out"
+              >
+                <IconButton
+                  icon={<ChevronRight size={20} />}
+                  onClick={toggleSidebar}
+                  bg="white"
+                  color="gray.600"
+                  border="1px solid"
+                  borderColor="gray.200"
+                  borderRadius="full"
+                  size="sm"
+                  _hover={{
+                    bg: 'primary.50',
+                    color: 'primary.600',
+                    borderColor: 'primary.300',
+                    transform: 'scale(1.05)'
+                  }}
+                  _active={{ transform: 'scale(0.95)' }}
+                  boxShadow="md"
+                  transition="all 0.2s"
+                  aria-label="Expandir sidebar"
+                />
+              </Box>
+            )}
 
             {/* Center - Video Grid */}
             <Flex flex={1} direction="column" bg={useColorModeValue('white', '#252a36')} p={5}>
               <Flex mb={4} justify="space-between" align="center">
-                <HStack mb={4} spacing={4}>
+                <HStack mb={4} spacing={4} ml={isSidebarCollapsed ? "50px" : "0px"} transition="all 0.3s ease-in-out">
                   <Button
                     variant={!isMapView ? "ghost" : "solid"}
                     size="sm"
@@ -827,53 +870,68 @@ const MonitoringDashboard = () => {
                       />
                     </Box>
 
-                    {/* Right Panel Toggle Button */}
-                    <Box
-                      position="absolute"
-                      right={isRightPanelVisible ? "20%" : "10px"}
-                      top="20px"
-                      zIndex="10"
-                      transition="all 0.3s ease-in-out"
-                    >
-                      <IconButton
-                        icon={isRightPanelVisible ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-                        onClick={toggleRightPanel}
-                        bg="white"
-                        color="gray.600"
-                        border="1px solid"
-                        borderColor="gray.200"
-                        borderRadius="full"
-                        size="sm"
-                        _hover={{
-                          bg: 'primary.50',
-                          color: 'primary.600',
-                          borderColor: 'primary.300',
-                          transform: 'scale(1.05)'
-                        }}
-                        _active={{ transform: 'scale(0.95)' }}
-                        boxShadow="md"
-                        transition="all 0.2s"
-                        aria-label={isRightPanelVisible ? "Ocultar panel" : "Mostrar panel"}
-                      />
-                    </Box>
+                    {/* Right Panel Toggle Button - Solo visible cuando el panel está cerrado */}
+                    {!isRightPanelVisible && (
+                      <Box
+                        position="absolute"
+                        right="10px"
+                        top="20px"
+                        zIndex="10"
+                        transition="all 0.3s ease-in-out"
+                      >
+                        <IconButton
+                          icon={<ChevronLeft size={20} />}
+                          onClick={toggleRightPanel}
+                          bg="white"
+                          color="gray.600"
+                          border="1px solid"
+                          borderColor="gray.200"
+                          borderRadius="full"
+                          size="sm"
+                          _hover={{
+                            bg: 'primary.50',
+                            color: 'primary.600',
+                            borderColor: 'primary.300',
+                            transform: 'scale(1.05)'
+                          }}
+                          _active={{ transform: 'scale(0.95)' }}
+                          boxShadow="md"
+                          transition="all 0.2s"
+                          aria-label="Mostrar panel"
+                        />
+                      </Box>
+                    )}
 
                     {/* Right Panel for Bus Information */}
-                    {isRightPanelVisible && (
-                      <Box
-                        w="20%"
-                        bg={useColorModeValue('white', '#2f3441')}
-                        borderLeft="1px solid"
-                        borderColor={useColorModeValue('gray.200', 'transparent')}
-                        p={4}
-                        overflowY="auto"
-                        transition="all 0.3s ease-in-out"
-                        minW="280px"
-                      >
+                    <Box
+                      w={isRightPanelVisible ? "20%" : "0%"}
+                      bg={useColorModeValue('white', '#2f3441')}
+                      borderLeft="1px solid"
+                      borderColor={useColorModeValue('gray.200', 'transparent')}
+                      p={isRightPanelVisible ? 4 : 0}
+                      overflowY="auto"
+                      overflowX="hidden"
+                      transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
+                      minW={isRightPanelVisible ? "280px" : "0px"}
+                      opacity={isRightPanelVisible ? 1 : 0}
+                      transform={isRightPanelVisible ? "translateX(0)" : "translateX(100%)"}
+                    >
                         {/* Bus Info Header */}
                         <Flex justify="space-between" align="center" mb={4}>
                           <Text fontSize="md" fontWeight="bold" color={useColorModeValue('gray.800', 'app.text.primary')}>
                             {selectedBusForPanel ? "Información del Bus" : "Panel de Control"}
                           </Text>
+                          <IconButton
+                            icon={<ChevronRight size={16} />}
+                            onClick={toggleRightPanel}
+                            size="sm"
+                            variant="ghost"
+                            color={useColorModeValue('gray.600', 'gray.400')}
+                            _hover={{
+                              bg: useColorModeValue('gray.100', 'gray.600')
+                            }}
+                            aria-label="Ocultar panel"
+                          />
                         </Flex>
 
                         {/* Panel Content */}
@@ -971,7 +1029,17 @@ const MonitoringDashboard = () => {
                                         style={{
                                           width: '100%',
                                           height: '100%',
-                                          objectFit: 'cover'
+                                          objectFit: 'cover',
+                                          cursor: 'pointer'
+                                        }}
+                                        onDoubleClick={() => {
+                                          setSelectedPhotoData({
+                                            imageUrl: selectedBusForPanel.fotos[currentPhotoIndex],
+                                            bus: selectedBusForPanel,
+                                            photoIndex: currentPhotoIndex,
+                                            totalPhotos: selectedBusForPanel.fotos.length
+                                          });
+                                          onRecentPictureModalOpen();
                                         }}
                                       />
 
@@ -986,8 +1054,9 @@ const MonitoringDashboard = () => {
                                             transform="translateY(-50%)"
                                             size="sm"
                                             bg="white"
+                                            color="gray.700"
                                             opacity="0.8"
-                                            _hover={{ opacity: 1 }}
+                                            _hover={{ opacity: 1, color: "gray.900" }}
                                             onClick={() => prevPhoto(selectedBusForPanel)}
                                             aria-label="Foto anterior"
                                           />
@@ -999,8 +1068,9 @@ const MonitoringDashboard = () => {
                                             transform="translateY(-50%)"
                                             size="sm"
                                             bg="white"
+                                            color="gray.700"
                                             opacity="0.8"
-                                            _hover={{ opacity: 1 }}
+                                            _hover={{ opacity: 1, color: "gray.900" }}
                                             onClick={() => nextPhoto(selectedBusForPanel)}
                                             aria-label="Foto siguiente"
                                           />
@@ -1062,7 +1132,6 @@ const MonitoringDashboard = () => {
                           )}
                         </VStack>
                       </Box>
-                    )}
                   </Flex>
                 </Box>
               ) : (
@@ -1150,6 +1219,18 @@ const MonitoringDashboard = () => {
             onClose={onPictureModalClose}
             bus={selectedBusForPicture}
             onPictureTaken={handlePictureTaken}
+          />
+
+          {/* Recent Picture Modal */}
+          <RecentPictureModal
+            isOpen={isRecentPictureModalOpen}
+            onClose={onRecentPictureModalClose}
+            imageUrl={selectedPhotoData?.imageUrl}
+            bus={selectedPhotoData?.bus}
+            photoIndex={selectedPhotoData?.photoIndex}
+            totalPhotos={selectedPhotoData?.totalPhotos}
+            onPrevious={selectedPhotoData?.totalPhotos > 1 ? handleModalPrevPhoto : null}
+            onNext={selectedPhotoData?.totalPhotos > 1 ? handleModalNextPhoto : null}
           />
 
           {/* Context Menu */}
