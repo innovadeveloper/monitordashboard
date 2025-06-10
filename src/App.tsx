@@ -1,9 +1,11 @@
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
+import { BrowserRouter } from 'react-router-dom';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { MonitoringDashboard, Login } from './components/views';
+import { Login } from './components/views';
+import AppRouter from './components/layouts/AppRouter';
 import theme from './theme';
 import { Box, Spinner, Flex } from '@chakra-ui/react';
 
@@ -22,14 +24,12 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Login />;
 };
 
-// Main App Router
-const AppRouter = () => {
-  const { isAuthenticated } = useAuth();
-
+// Main App Router Component
+const MainRouter = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <ProtectedRoute>
-        <MonitoringDashboard />
+        <AppRouter />
       </ProtectedRoute>
     </DndProvider>
   );
@@ -39,7 +39,9 @@ function App() {
   return (
     <ChakraProvider theme={theme}>
       <AuthProvider>
-        <AppRouter />
+        <BrowserRouter>
+          <MainRouter />
+        </BrowserRouter>
       </AuthProvider>
     </ChakraProvider>
   );
