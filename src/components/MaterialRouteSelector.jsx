@@ -1,42 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import {
   Box,
-  Flex,
   Text,
   HStack,
-  VStack,
-  Input,
   Button,
-  Badge,
-  Grid,
-  GridItem,
-  IconButton,
-  useToast,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
   useColorModeValue,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
   Portal,
-  Divider,
 } from '@chakra-ui/react';
-import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin, Route, Navigation } from 'lucide-react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-
-
-// 1. Importar los nuevos componentes
-import ContextMenu from './ContextMenu';
-import EnhancedCameraPanel from './EnhancedCameraPanel';
-import { useContextMenu } from '../hooks/useContextMenu';
+import { ChevronDown, MapPin, Route, Navigation } from 'lucide-react';
 
 
 
@@ -58,42 +33,43 @@ const MaterialRouteSelector = ({ value, onChange }) => {
         rightIcon={<ChevronDown size={16} />}
         w="100%"
         h="40px"
-        bg="white"
-        border="2px solid"
-        borderColor="gray.200"
+        bg={useColorModeValue('white', '#2a2f3a')}
+        border="1px solid"
+        borderColor={useColorModeValue('gray.200', 'transparent')}
         borderRadius="12px"
         fontSize="14px"
         fontWeight="500"
-        color="gray.700"
+        color={useColorModeValue('gray.700', '#e2e8f0')}
         transition="all 0.2s"
         _hover={{
-          borderColor: 'blue.400',
-          boxShadow: '0 0 0 1px rgba(66, 153, 225, 0.6)',
-          transform: 'translateY(-1px)'
+          borderColor: useColorModeValue('blue.400', 'primary.600'),
+          boxShadow: useColorModeValue('0 0 0 1px rgba(66, 153, 225, 0.6)', 'none'),
+          transform: 'translateY(-1px)',
+          bg: useColorModeValue('gray.50', '#2f3441')
         }}
         _active={{
-          borderColor: 'blue.500',
-          boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.6)'
+          borderColor: useColorModeValue('blue.500', 'primary.500'),
+          boxShadow: useColorModeValue('0 0 0 2px rgba(66, 153, 225, 0.6)', 'none')
         }}
         _focus={{
-          borderColor: 'blue.500',
-          boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.6)'
+          borderColor: useColorModeValue('blue.500', 'primary.500'),
+          boxShadow: useColorModeValue('0 0 0 2px rgba(66, 153, 225, 0.6)', 'none')
         }}
       >
         <HStack spacing={3} w="100%" justify="flex-start">
           <Box color={selectedRoute.color}>
             {selectedRoute.icon}
           </Box>
-          <Text>{selectedRoute.label}</Text>
+          <Text color={useColorModeValue('gray.700', '#e2e8f0')}>{selectedRoute.label}</Text>
         </HStack>
       </MenuButton>
       <Portal>
         <MenuList
-          bg="white"
+          bg={useColorModeValue('white', '#2f3441')}
           border="1px solid"
-          borderColor="gray.200"
+          borderColor={useColorModeValue('gray.200', 'transparent')}
           borderRadius="12px"
-          boxShadow="0 10px 25px rgba(0,0,0,0.15)"
+          boxShadow={useColorModeValue('0 10px 25px rgba(0,0,0,0.15)', '0 10px 25px rgba(0,0,0,0.3)')}
           p={2}
           minW="280px"
         >
@@ -101,21 +77,30 @@ const MaterialRouteSelector = ({ value, onChange }) => {
             <MenuItem
               key={route.value}
               onClick={() => onChange(route.value)}
-              bg={value === route.value ? 'blue.50' : 'transparent'}
+              bg={value === route.value ? 
+                useColorModeValue('blue.50', 'primary.800') : 
+                useColorModeValue('transparent', 'transparent')
+              }
               borderRadius="8px"
               px={3}
               py={2}
               mb={index < routes.length - 1 ? 1 : 0}
               transition="all 0.2s"
+              color={useColorModeValue('gray.700', '#e2e8f0')}
               _hover={{
-                bg: value === route.value ? 'blue.100' : 'gray.50'
+                bg: value === route.value ? 
+                  useColorModeValue('blue.100', 'primary.700') : 
+                  useColorModeValue('gray.50', '#35394a')
               }}
             >
               <HStack spacing={3}>
                 <Box color={route.color}>
                   {route.icon}
                 </Box>
-                <Text fontWeight={value === route.value ? "600" : "400"}>
+                <Text 
+                  fontWeight={value === route.value ? "600" : "400"}
+                  color={useColorModeValue('gray.700', '#e2e8f0')}
+                >
                   {route.label}
                 </Text>
                 {value === route.value && (

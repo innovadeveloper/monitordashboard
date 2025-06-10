@@ -39,8 +39,8 @@ const ContextMenu = ({
   isMuted = false 
 }) => {
   const menuRef = useRef();
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const bgColor = useColorModeValue('white', '#2f3441');
+  const borderColor = useColorModeValue('gray.200', 'transparent');
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -155,10 +155,10 @@ const ContextMenu = ({
       {panelData && (
         <>
           <Box p={2} mb={2}>
-            <Text fontSize="sm" fontWeight="600" color="gray.700">
+            <Text fontSize="sm" fontWeight="600" color={useColorModeValue('gray.700', '#e2e8f0')}>
               {panelData.bus?.id} - {panelData.cameraType?.toUpperCase()}
             </Text>
-            <Text fontSize="xs" color="gray.500">
+            <Text fontSize="xs" color={useColorModeValue('gray.500', '#a0aec0')}>
               {panelData.bus?.conductor}
             </Text>
           </Box>
@@ -184,13 +184,17 @@ const ContextMenu = ({
                 onClose();
               }}
               borderRadius="8px"
-              color={item.variant === 'danger' ? 'red.500' : 'gray.700'}
+              color={item.variant === 'danger' ? 'red.500' : useColorModeValue('gray.700', '#e2e8f0')}
               _hover={{ 
-                bg: item.variant === 'danger' ? 'red.50' : 'gray.50',
+                bg: item.variant === 'danger' 
+                  ? useColorModeValue('red.50', 'red.900')
+                  : useColorModeValue('gray.50', '#35394a'),
                 color: item.variant === 'danger' ? 'red.600' : item.color
               }}
               _active={{
-                bg: item.variant === 'danger' ? 'red.100' : 'gray.100'
+                bg: item.variant === 'danger' 
+                  ? useColorModeValue('red.100', 'red.800')
+                  : useColorModeValue('gray.100', '#3a3f4c')
               }}
               transition="all 0.2s"
             >
@@ -198,7 +202,7 @@ const ContextMenu = ({
                 {/* <Box color={item.color}>
                   {item.icon}
                 </Box> */}
-                <Text fontSize="sm">{item.label}</Text>
+                <Text fontSize="sm" color={useColorModeValue('gray.700', '#e2e8f0')}>{item.label}</Text>
               </HStack>
             </Button>
           );

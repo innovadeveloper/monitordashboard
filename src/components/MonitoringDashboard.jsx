@@ -30,8 +30,9 @@ import {
   Divider,
   Badge,
   IconButton,
+  useColorMode,
 } from '@chakra-ui/react';
-import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin, Route, Navigation, ChevronLeft, ChevronRight, Phone, MessageCircle, ImageIcon, Send, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin, Route, Navigation, ChevronLeft, ChevronRight, Phone, MessageCircle, ImageIcon, Send, ArrowLeft, ArrowRight, Sun, Moon } from 'lucide-react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -129,6 +130,7 @@ const mockBuses = [
 // Main Dashboard Component
 const MonitoringDashboard = () => {
   const { user, logout } = useAuth();
+  const { colorMode, toggleColorMode } = useColorMode();
   const [buses] = useState(mockBuses);
   const [filteredBuses, setFilteredBuses] = useState(mockBuses);
   const [selectedBus, setSelectedBus] = useState(null);
@@ -175,8 +177,8 @@ const MonitoringDashboard = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
-  const headerBg = useColorModeValue('gray.800', 'gray.800');
+  const bgColor = useColorModeValue('app.bg.primary', 'app.bg.primary');
+  const headerBg = useColorModeValue('app.surface.header', 'app.surface.header');
 
   // Filter buses
   useEffect(() => {
@@ -203,7 +205,7 @@ const MonitoringDashboard = () => {
     }
   }, [searchTerm, routeFilter, buses, selectedBus]);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts and click outside handling
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key >= 'F1' && e.key <= 'F4') {
@@ -217,10 +219,28 @@ const MonitoringDashboard = () => {
           isClosable: true,
         });
       }
+      
+      // Clear bus selection on Escape
+      if (e.key === 'Escape') {
+        setSelectedBus(null);
+      }
+    };
+
+    const handleClickOutside = (e) => {
+      // Check if click is outside the sidebar (bus list area)
+      const sidebar = document.querySelector('[data-sidebar="true"]');
+      if (sidebar && !sidebar.contains(e.target)) {
+        setSelectedBus(null);
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [toast]);
 
   const handleBusClick = (busId) => {
@@ -537,6 +557,20 @@ const MonitoringDashboard = () => {
               >
                 Centro de Alertas
               </Button>
+              
+              {/* Theme Toggle Button */}
+              <IconButton
+                icon={colorMode === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                onClick={toggleColorMode}
+                size="sm"
+                variant="ghost"
+                color="white"
+                _hover={{
+                  bg: 'whiteAlpha.200',
+                }}
+                aria-label={colorMode === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
+              />
+              
               <Menu>
                 <MenuButton
                   as={Button}
@@ -560,23 +594,23 @@ const MonitoringDashboard = () => {
           </Flex>
 
           {/* Status Bar */}
-          <Flex bg="white" px={6} py={3} borderBottom="1px" borderColor="gray.200">
+          <Flex bg={useColorModeValue('white', '#252a36')} px={6} py={3} borderBottom="1px" borderColor={useColorModeValue('gray.200', 'transparent')}>
             <HStack spacing={8}>
               <HStack>
-                <Box w={3} h={3} bg="red.500" borderRadius="full" />
-                <Text fontSize="sm" color="gray.600">3 Alertas Críticas</Text>
+                <Box w={3} h={3} bg="app.status.error" borderRadius="full" />
+                <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>3 Alertas Críticas</Text>
               </HStack>
               <HStack>
-                <Box w={3} h={3} bg="orange.500" borderRadius="full" />
-                <Text fontSize="sm" color="gray.600">7 Advertencias</Text>
+                <Box w={3} h={3} bg="app.status.warning" borderRadius="full" />
+                <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>7 Advertencias</Text>
               </HStack>
               <HStack>
-                <Box w={3} h={3} bg="green.500" borderRadius="full" />
-                <Text fontSize="sm" color="gray.600">85 Unidades Activas</Text>
+                <Box w={3} h={3} bg="app.status.active" borderRadius="full" />
+                <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>85 Unidades Activas</Text>
               </HStack>
               <HStack>
-                <Box w={3} h={3} bg="orange.500" borderRadius="full" />
-                <Text fontSize="sm" color="gray.600">5 Con Retraso</Text>
+                <Box w={3} h={3} bg="app.status.warning" borderRadius="full" />
+                <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>5 Con Retraso</Text>
               </HStack>
             </HStack>
           </Flex>
@@ -586,17 +620,18 @@ const MonitoringDashboard = () => {
             {/* Left Sidebar - Bus List */}
             <Box
               w={isSidebarCollapsed ? "0px" : "320px"}
-              bg="white"
+              bg={useColorModeValue('white', '#252a36')}
               borderRight="1px"
-              borderColor="gray.200"
+              borderColor={useColorModeValue('gray.200', 'transparent')}
               p={isSidebarCollapsed ? 0 : 5}
               overflow="hidden"
               transition="all 0.3s ease-in-out"
               position="relative"
+              data-sidebar="true"
             >
               {!isSidebarCollapsed && (
                 <>
-                  <Text fontSize="lg" fontWeight="600" mb={4}>
+                  <Text fontSize="lg" fontWeight="600" mb={4} color={useColorModeValue('gray.800', 'app.text.primary')}>
                     Unidades Activas
                   </Text>
 
@@ -607,10 +642,20 @@ const MonitoringDashboard = () => {
                       onChange={(e) => setSearchTerm(e.target.value)}
                       size="sm"
                       borderRadius="12px"
-                      border="2px solid"
-                      borderColor="gray.200"
-                      _hover={{ borderColor: 'blue.300' }}
-                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px rgba(66, 153, 225, 0.6)' }}
+                      border="1px solid"
+                      borderColor={useColorModeValue('gray.200', 'transparent')}
+                      bg={useColorModeValue('white', '#2a2f3a')}
+                      color={useColorModeValue('gray.800', '#e2e8f0')}
+                      _placeholder={{ color: useColorModeValue('gray.500', '#718096') }}
+                      _hover={{ 
+                        borderColor: useColorModeValue('blue.300', 'primary.600'),
+                        bg: useColorModeValue('gray.50', '#2f3441')
+                      }}
+                      _focus={{ 
+                        borderColor: useColorModeValue('blue.500', 'primary.500'), 
+                        boxShadow: useColorModeValue('0 0 0 1px rgba(66, 153, 225, 0.6)', 'none'),
+                        bg: useColorModeValue('white', '#2f3441')
+                      }}
                     />
                     <MaterialRouteSelector
                       value={routeFilter}
@@ -626,16 +671,20 @@ const MonitoringDashboard = () => {
                         width: '8px',
                       },
                       '&::-webkit-scrollbar-track': {
-                        background: '#f1f5f9',
+                        background: colorMode === 'light' ? '#f1f5f9' : '#1a1d29',
                         borderRadius: '10px',
                       },
                       '&::-webkit-scrollbar-thumb': {
-                        background: 'linear-gradient(180deg, #cbd5e0 0%, #a0aec0 100%)',
+                        background: colorMode === 'light' 
+                          ? 'linear-gradient(180deg, #cbd5e0 0%, #a0aec0 100%)'
+                          : 'linear-gradient(180deg, #35394a 0%, #2a2f3a 100%)',
                         borderRadius: '10px',
-                        border: '2px solid #f1f5f9',
+                        border: colorMode === 'light' ? '2px solid #f1f5f9' : '2px solid #1a1d29',
                       },
                       '&::-webkit-scrollbar-thumb:hover': {
-                        background: 'linear-gradient(180deg, #a0aec0 0%, #718096 100%)',
+                        background: colorMode === 'light'
+                          ? 'linear-gradient(180deg, #a0aec0 0%, #718096 100%)'
+                          : 'linear-gradient(180deg, #3a3f4c 0%, #35394a 100%)',
                       },
                     }}
                   >
@@ -684,14 +733,14 @@ const MonitoringDashboard = () => {
             </Box>
 
             {/* Center - Video Grid */}
-            <Flex flex={1} direction="column" bg="white" p={5}>
+            <Flex flex={1} direction="column" bg={useColorModeValue('white', '#252a36')} p={5}>
               <Flex mb={4} justify="space-between" align="center">
                 <HStack mb={4} spacing={4}>
                   <Button
                     variant={!isMapView ? "ghost" : "solid"}
                     size="sm"
                     leftIcon={<span>🗺️</span>}
-                    color={!isMapView ? "gray.600" : "white"}
+                    color={!isMapView ? useColorModeValue("gray.600", "#e2e8f0") : "white"}
                     bg={!isMapView ? "transparent" : "primary.500"}
                     _hover={{ color: 'primary.600', bg: 'primary.50' }}
                     onClick={handleMapToggle}
@@ -699,9 +748,13 @@ const MonitoringDashboard = () => {
                     Mapa Central
                   </Button>
                   <Button
-                    variant={isMapView ? "ghost" : "videoPrimary"}
+                    variant={isMapView ? "ghost" : "solid"}
                     size="sm"
                     leftIcon={<span>📹</span>}
+                    colorScheme={!isMapView ? "blue" : "gray"}
+                    color={!isMapView ? "white" : useColorModeValue("gray.600", "#e2e8f0")}
+                    bg={!isMapView ? "primary.500" : "transparent"}
+                    _hover={{ color: 'primary.600', bg: 'primary.50' }}
                     onClick={handleMapToggle}
                   >
                     Video Digital
@@ -722,28 +775,28 @@ const MonitoringDashboard = () => {
                 <Box
                   w="100%"
                   h="100%"
-                  bg="gray.50"
+                  bg={useColorModeValue('gray.50', '#2a2f3a')}
                   borderRadius="xl"
-                  border="2px solid"
-                  borderColor="gray.200"
+                  border="1px solid"
+                  borderColor={useColorModeValue('gray.200', 'transparent')}
                   position="relative"
                   overflow="hidden"
                 >
                   {/* Map Header */}
                   <Flex
-                    bg="white"
+                    bg={useColorModeValue('white', '#2f3441')}
                     p={4}
                     borderBottom="1px solid"
-                    borderColor="gray.200"
+                    borderColor={useColorModeValue('gray.200', 'transparent')}
                     align="center"
                     justify="space-between"
                   >
                     <HStack spacing={3}>
                       <Box>
-                        <Text fontSize="lg" fontWeight="bold" color="gray.800">
+                        <Text fontSize="lg" fontWeight="bold" color={useColorModeValue('gray.800', 'app.text.primary')}>
                           Mapa GPS en Tiempo Real - Lima, Perú
                         </Text>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>
                           {filteredBuses.length} unidades monitoreadas
                         </Text>
                       </Box>
@@ -820,9 +873,9 @@ const MonitoringDashboard = () => {
                     {isRightPanelVisible && (
                       <Box
                         w="20%"
-                        bg="white"
+                        bg={useColorModeValue('white', '#2f3441')}
                         borderLeft="1px solid"
-                        borderColor="gray.200"
+                        borderColor={useColorModeValue('gray.200', 'transparent')}
                         p={4}
                         overflowY="auto"
                         transition="all 0.3s ease-in-out"
@@ -830,7 +883,7 @@ const MonitoringDashboard = () => {
                       >
                         {/* Bus Info Header */}
                         <Flex justify="space-between" align="center" mb={4}>
-                          <Text fontSize="md" fontWeight="bold" color="gray.800">
+                          <Text fontSize="md" fontWeight="bold" color={useColorModeValue('gray.800', 'app.text.primary')}>
                             {selectedBusForPanel ? "Información del Bus" : "Panel de Control"}
                           </Text>
                         </Flex>
@@ -840,10 +893,10 @@ const MonitoringDashboard = () => {
                           {selectedBusForPanel ? (
                             <>
                               {/* Basic Info */}
-                              <Box p={4} bg="gray.50" borderRadius="lg">
+                              <Box p={4} bg={useColorModeValue('gray.50', '#35394a')} borderRadius="lg">
                                 <VStack spacing={2} align="start">
                                   <Flex justify="space-between" w="100%">
-                                    <Text fontSize="xl" fontWeight="bold" color="gray.800">
+                                    <Text fontSize="xl" fontWeight="bold" color={useColorModeValue('gray.800', 'app.text.primary')}>
                                       {selectedBusForPanel.id}
                                     </Text>
                                     <Badge
@@ -856,16 +909,16 @@ const MonitoringDashboard = () => {
                                         selectedBusForPanel.estado === 'warning' ? 'Con Retraso' : 'Fuera de Ruta'}
                                     </Badge>
                                   </Flex>
-                                  <Text color="gray.600">
+                                  <Text color={useColorModeValue('gray.600', 'app.text.secondary')}>
                                     <strong>Conductor:</strong> {selectedBusForPanel.conductor}
                                   </Text>
-                                  <Text color="gray.600">
+                                  <Text color={useColorModeValue('gray.600', 'app.text.secondary')}>
                                     <strong>Ruta:</strong> {selectedBusForPanel.ruta}
                                   </Text>
-                                  <Text color="gray.600">
+                                  <Text color={useColorModeValue('gray.600', 'app.text.secondary')}>
                                     <strong>Velocidad:</strong> {selectedBusForPanel.velocidad}
                                   </Text>
-                                  <Text color="gray.600">
+                                  <Text color={useColorModeValue('gray.600', 'app.text.secondary')}>
                                     <strong>Último reporte:</strong> {selectedBusForPanel.tiempo}
                                   </Text>
                                 </VStack>
@@ -873,7 +926,7 @@ const MonitoringDashboard = () => {
 
                               {/* Communication Functions */}
                               <Box>
-                                <Text fontSize="md" fontWeight="600" mb={3} color="gray.700">
+                                <Text fontSize="md" fontWeight="600" mb={3} color={useColorModeValue('gray.700', 'app.text.primary')}>
                                   Funciones de Comunicación
                                 </Text>
                                 <VStack spacing={2}>
@@ -910,7 +963,7 @@ const MonitoringDashboard = () => {
                               {/* Recent Photos Section */}
                               {selectedBusForPanel.fotos && selectedBusForPanel.fotos.length > 0 && (
                                 <Box>
-                                  <Text fontSize="md" fontWeight="600" mb={3} color="gray.700">
+                                  <Text fontSize="md" fontWeight="600" mb={3} color={useColorModeValue('gray.700', 'app.text.primary')}>
                                     Fotos Recientes
                                   </Text>
                                   <Box position="relative">
@@ -921,7 +974,7 @@ const MonitoringDashboard = () => {
                                       borderRadius="lg"
                                       overflow="hidden"
                                       border="1px solid"
-                                      borderColor="gray.200"
+                                      borderColor={useColorModeValue('gray.200', 'gray.600')}
                                       position="relative"
                                     >
                                       <img
@@ -970,7 +1023,7 @@ const MonitoringDashboard = () => {
                                     {/* Photo Counter */}
                                     <Text
                                       fontSize="xs"
-                                      color="gray.500"
+                                      color={useColorModeValue('gray.500', 'app.text.tertiary')}
                                       textAlign="center"
                                       mt={2}
                                     >
@@ -988,7 +1041,7 @@ const MonitoringDashboard = () => {
                                             borderRadius="md"
                                             overflow="hidden"
                                             border="2px solid"
-                                            borderColor={index === currentPhotoIndex ? "blue.500" : "gray.200"}
+                                            borderColor={index === currentPhotoIndex ? "blue.500" : useColorModeValue("gray.200", "gray.600")}
                                             cursor="pointer"
                                             onClick={() => setCurrentPhotoIndex(index)}
                                           >
@@ -1010,11 +1063,11 @@ const MonitoringDashboard = () => {
                             </>
                           ) : (
                             /* Default Panel Content */
-                            <Box p={4} bg="blue.50" borderRadius="lg" textAlign="center">
-                              <Text fontSize="sm" color="blue.700" mb={2}>
+                            <Box p={4} bg={useColorModeValue('blue.50', 'primary.900')} borderRadius="lg" textAlign="center">
+                              <Text fontSize="sm" color={useColorModeValue('blue.700', 'primary.200')} mb={2}>
                                 👆 Selecciona un bus en el mapa
                               </Text>
-                              <Text fontSize="xs" color="blue.600">
+                              <Text fontSize="xs" color={useColorModeValue('blue.600', 'primary.300')}>
                                 Haz clic en cualquier marcador para ver la información del vehículo
                               </Text>
                             </Box>

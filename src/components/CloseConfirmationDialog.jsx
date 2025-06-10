@@ -24,8 +24,8 @@ const CloseConfirmationDialog = ({
   panelData,
   cancelRef 
 }) => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const textColor = useColorModeValue('gray.600', 'gray.300');
+  const bgColor = useColorModeValue('white', '#2f3441');
+  const textColor = useColorModeValue('gray.600', '#a0aec0');
 
   return (
     <AlertDialog
@@ -45,13 +45,13 @@ const CloseConfirmationDialog = ({
             <HStack spacing={3}>
               <Box 
                 p={2} 
-                bg="red.100" 
+                bg={useColorModeValue("red.100", "red.900")} 
                 borderRadius="full"
-                color="red.500"
+                color={useColorModeValue("red.500", "red.300")}
               >
                 <AlertTriangle size={20} />
               </Box>
-              <Text>Confirmar Cierre</Text>
+              <Text color={useColorModeValue('gray.800', '#e2e8f0')}>Confirmar Cierre</Text>
             </HStack>
           </AlertDialogHeader>
 
@@ -64,14 +64,14 @@ const CloseConfirmationDialog = ({
               {panelData && (
                 <Box 
                   p={4} 
-                  bg="gray.50" 
+                  bg={useColorModeValue("gray.50", "#35394a")} 
                   borderRadius="12px"
                   border="1px solid"
-                  borderColor="gray.200"
+                  borderColor={useColorModeValue("gray.200", "transparent")}
                 >
                   <HStack spacing={3} mb={3}>
-                    <Camera size={16} color="gray.500" />
-                    <Text fontWeight="600" color="gray.800">
+                    <Camera size={16} color={useColorModeValue("gray.500", "#a0aec0")} />
+                    <Text fontWeight="600" color={useColorModeValue("gray.800", "#e2e8f0")}>
                       {panelData.bus?.id}
                     </Text>
                     <Badge colorScheme="blue" fontSize="10px">
@@ -80,10 +80,10 @@ const CloseConfirmationDialog = ({
                   </HStack>
                   
                   <VStack spacing={1} align="start">
-                    <Text fontSize="sm" color="gray.600">
+                    <Text fontSize="sm" color={useColorModeValue("gray.600", "#a0aec0")}>
                       <strong>Conductor:</strong> {panelData.bus?.conductor}
                     </Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text fontSize="sm" color={useColorModeValue("gray.600", "#a0aec0")}>
                       <strong>Panel:</strong> {panelData.id}
                     </Text>
                   </VStack>
@@ -92,12 +92,12 @@ const CloseConfirmationDialog = ({
 
               <Box 
                 p={3} 
-                bg="orange.50" 
+                bg={useColorModeValue("orange.50", "orange.900")} 
                 borderRadius="8px"
                 border="1px solid"
-                borderColor="orange.200"
+                borderColor={useColorModeValue("orange.200", "orange.700")}
               >
-                <Text fontSize="sm" color="orange.700">
+                <Text fontSize="sm" color={useColorModeValue("orange.700", "orange.200")}>
                   <strong>Nota:</strong> Esta acción liberará el panel y detendrá la transmisión de video.
                 </Text>
               </Box>
@@ -110,6 +110,11 @@ const CloseConfirmationDialog = ({
               onClick={onClose}
               variant="ghost"
               borderRadius="8px"
+              color={useColorModeValue('gray.600', '#a0aec0')}
+              _hover={{ 
+                bg: useColorModeValue('gray.100', '#35394a'),
+                color: useColorModeValue('gray.800', '#e2e8f0')
+              }}
             >
               Cancelar
             </Button>

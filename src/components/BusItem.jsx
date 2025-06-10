@@ -1,36 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import {
   Box,
-  Flex,
   Text,
-  HStack,
-  VStack,
-  Input,
-  Button,
   Badge,
-  Grid,
-  GridItem,
-  IconButton,
-  useToast,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
   useColorModeValue,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Portal,
-  Divider,
 } from '@chakra-ui/react';
-import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin, Route, Navigation } from 'lucide-react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 
 
 
@@ -38,10 +12,10 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 const BusItem = ({ bus, isSelected, onClick, onDragStart }) => {
   const getStatusColor = (estado) => {
     switch (estado) {
-      case 'active': return 'green.500';
-      case 'warning': return 'orange.500';
-      case 'error': return 'red.500';
-      default: return 'green.500';
+      case 'active': return 'app.status.active';
+      case 'warning': return 'app.status.warning';
+      case 'error': return 'app.status.error';
+      default: return 'app.status.active';
     }
   };
 
@@ -49,9 +23,9 @@ const BusItem = ({ bus, isSelected, onClick, onDragStart }) => {
     <Box
       p={3}
       mb={2}
-      bg={isSelected ? 'blue.50' : 'white'}
+      bg={isSelected ? useColorModeValue('blue.50', 'primary.800') : useColorModeValue('white', '#2a2f3a')}
       border="1px"
-      borderColor={isSelected ? 'blue.500' : 'gray.200'}
+      borderColor={isSelected ? useColorModeValue('blue.300', 'primary.600') : useColorModeValue('gray.200', 'transparent')}
       borderRadius="md"
       cursor="grab"
       transition="all 0.2s"
@@ -60,9 +34,10 @@ const BusItem = ({ bus, isSelected, onClick, onDragStart }) => {
       onDragStart={onDragStart}
       onClick={onClick}
       _hover={{
-        borderColor: 'blue.500',
+        borderColor: useColorModeValue('blue.300', 'primary.600'),
         transform: 'translateY(-1px)',
-        boxShadow: 'md'
+        boxShadow: useColorModeValue('md', 'none'),
+        bg: isSelected ? useColorModeValue('blue.100', 'primary.700') : useColorModeValue('gray.50', '#2f3441')
       }}
       _active={{ cursor: 'grabbing' }}
     >
@@ -76,13 +51,13 @@ const BusItem = ({ bus, isSelected, onClick, onDragStart }) => {
         borderRadius="full"
       />
 
-      <Text fontWeight="600" color="gray.800" mb={1}>
+      <Text fontWeight="600" color={useColorModeValue('gray.800', '#e2e8f0')} mb={1}>
         {bus.id}
       </Text>
-      <Text fontSize="xs" color="gray.600" mb={1}>
+      <Text fontSize="xs" color={useColorModeValue('gray.600', '#a0aec0')} mb={1}>
         {bus.conductor} • {bus.tiempo}
       </Text>
-      <Text fontSize="xs" color="gray.500">
+      <Text fontSize="xs" color={useColorModeValue('gray.500', '#718096')}>
         {bus.ruta}
       </Text>
 

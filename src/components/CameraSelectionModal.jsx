@@ -44,13 +44,13 @@ const CameraSelectionModal = ({ isOpen, onClose, bus, onCameraSelect }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Seleccionar Cámara</ModalHeader>
-        <ModalCloseButton />
+      <ModalContent bg={useColorModeValue('white', '#2f3441')} color={useColorModeValue('gray.800', '#e2e8f0')}>
+        <ModalHeader color={useColorModeValue('gray.800', '#e2e8f0')}>Seleccionar Cámara</ModalHeader>
+        <ModalCloseButton color={useColorModeValue('gray.600', '#a0aec0')} />
         <ModalBody>
           {bus && (
             <VStack spacing={4}>
-              <Text fontSize="lg" fontWeight="600" color="blue.600">
+              <Text fontSize="lg" fontWeight="600" color={useColorModeValue('blue.600', 'primary.300')}>
                 {bus.id} - {bus.conductor}
               </Text>
 
@@ -60,20 +60,39 @@ const CameraSelectionModal = ({ isOpen, onClose, bus, onCameraSelect }) => {
                     key={camera.type}
                     p={4}
                     border="2px"
-                    borderColor="gray.200"
+                    borderColor={useColorModeValue('gray.200', 'gray.600')}
                     borderRadius="lg"
                     cursor="pointer"
                     textAlign="center"
                     transition="all 0.2s"
+                    bg={useColorModeValue('white', '#2a2f3a')}
+                    role="group"
                     _hover={{
-                      borderColor: 'blue.500',
-                      bg: 'blue.50'
+                      borderColor: useColorModeValue('blue.500', 'primary.400'),
+                      bg: useColorModeValue('blue.50', 'white'),
+                      '& .camera-text': {
+                        color: useColorModeValue('gray.800', 'gray.800')
+                      },
+                      '& .camera-desc': {
+                        color: useColorModeValue('gray.600', 'gray.600')
+                      }
                     }}
                     onClick={() => onCameraSelect(camera.type)}
                   >
                     <Text fontSize="2xl" mb={2}>{camera.icon}</Text>
-                    <Text fontWeight="600" mb={1}>{camera.label}</Text>
-                    <Text fontSize="xs" color="gray.600">
+                    <Text 
+                      className="camera-text"
+                      fontWeight="600" 
+                      mb={1} 
+                      color={useColorModeValue('gray.800', '#e2e8f0')}
+                    >
+                      {camera.label}
+                    </Text>
+                    <Text 
+                      className="camera-desc"
+                      fontSize="xs" 
+                      color={useColorModeValue('gray.600', '#a0aec0')}
+                    >
                       {camera.description}
                     </Text>
                   </Box>
@@ -83,7 +102,15 @@ const CameraSelectionModal = ({ isOpen, onClose, bus, onCameraSelect }) => {
           )}
         </ModalBody>
         <ModalFooter>
-          <Button variant="ghost" onClick={onClose}>
+          <Button 
+            variant="ghost" 
+            onClick={onClose}
+            color={useColorModeValue('gray.600', '#a0aec0')}
+            _hover={{ 
+              bg: useColorModeValue('gray.100', '#35394a'),
+              color: useColorModeValue('gray.800', '#e2e8f0')
+            }}
+          >
             Cancelar
           </Button>
         </ModalFooter>

@@ -31,10 +31,10 @@ const Login = () => {
 
   const bgGradient = useColorModeValue(
     'linear(to-br, blue.50, indigo.100, purple.50)',
-    'linear(to-br, gray.900, blue.900, purple.900)'
+    'linear(to-br, app.bg.primary, app.bg.secondary, app.bg.tertiary)'
   );
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const cardBg = useColorModeValue('white', '#2f3441');
+  const borderColor = useColorModeValue('gray.200', 'transparent');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -117,20 +117,20 @@ const Login = () => {
                 <Bus size={32} />
               </Box>
               <VStack spacing={0} align="start">
-                <Text fontSize="2xl" fontWeight="bold" color="gray.800">
+                <Text fontSize="2xl" fontWeight="bold" color={useColorModeValue('gray.800', 'app.text.primary')}>
                   GPS Fleet
                 </Text>
-                <Text fontSize="sm" color="gray.600">
+                <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>
                   Sistema de Monitoreo
                 </Text>
               </VStack>
             </Flex>
             
             <Box textAlign="center">
-              <Text fontSize="lg" fontWeight="600" color="gray.700" mb={1}>
+              <Text fontSize="lg" fontWeight="600" color={useColorModeValue('gray.700', 'app.text.primary')} mb={1}>
                 Bienvenido de vuelta
               </Text>
-              <Text fontSize="sm" color="gray.500">
+              <Text fontSize="sm" color={useColorModeValue('gray.500', 'app.text.secondary')}>
                 Ingresa tus credenciales para acceder al dashboard
               </Text>
             </Box>
@@ -140,12 +140,12 @@ const Login = () => {
           <form onSubmit={handleSubmit}>
             <VStack spacing={5}>
               <FormControl>
-                <FormLabel fontSize="sm" color="gray.600" fontWeight="500">
+                <FormLabel fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')} fontWeight="500">
                   Usuario
                 </FormLabel>
                 <InputGroup>
                   <InputLeftElement>
-                    <Icon as={User} color="gray.400" w={5} h={5} />
+                    <Icon as={User} color={useColorModeValue('gray.400', 'app.text.tertiary')} w={5} h={5} />
                   </InputLeftElement>
                   <Input
                     type="text"
@@ -154,13 +154,15 @@ const Login = () => {
                     onChange={(e) => handleInputChange('username', e.target.value)}
                     borderRadius="xl"
                     border="2px solid"
-                    borderColor="gray.200"
-                    bg="gray.50"
-                    _hover={{ borderColor: 'primary.300', bg: 'white' }}
+                    borderColor={useColorModeValue('gray.200', 'transparent')}
+                    bg={useColorModeValue('gray.50', '#35394a')}
+                    color={useColorModeValue('gray.800', '#e2e8f0')}
+                    _placeholder={{ color: useColorModeValue('gray.500', '#718096') }}
+                    _hover={{ borderColor: 'primary.300', bg: useColorModeValue('white', '#3a3f4c') }}
                     _focus={{ 
                       borderColor: 'primary.500', 
-                      bg: 'white',
-                      boxShadow: '0 0 0 1px rgba(66, 153, 225, 0.6)'
+                      bg: useColorModeValue('white', '#3a3f4c'),
+                      boxShadow: useColorModeValue('0 0 0 1px rgba(66, 153, 225, 0.6)', 'none')
                     }}
                     pl={12}
                     h={12}
@@ -170,12 +172,12 @@ const Login = () => {
               </FormControl>
 
               <FormControl>
-                <FormLabel fontSize="sm" color="gray.600" fontWeight="500">
+                <FormLabel fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')} fontWeight="500">
                   Contraseña
                 </FormLabel>
                 <InputGroup>
                   <InputLeftElement>
-                    <Icon as={Lock} color="gray.400" w={5} h={5} />
+                    <Icon as={Lock} color={useColorModeValue('gray.400', 'app.text.tertiary')} w={5} h={5} />
                   </InputLeftElement>
                   <Input
                     type="password"
@@ -184,13 +186,18 @@ const Login = () => {
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     borderRadius="xl"
                     border="2px solid"
-                    borderColor="gray.200"
-                    bg="gray.50"
-                    _hover={{ borderColor: 'primary.300', bg: 'white' }}
+                    borderColor={useColorModeValue('gray.200', 'transparent')}
+                    bg={useColorModeValue('gray.50', '#35394a')}
+                    color={useColorModeValue('gray.800', '#e2e8f0')}
+                    _placeholder={{ color: useColorModeValue('gray.500', '#718096') }}
+                    _hover={{ 
+                      borderColor: 'primary.300', 
+                      bg: useColorModeValue('white', '#3a3f4c') 
+                    }}
                     _focus={{ 
                       borderColor: 'primary.500', 
-                      bg: 'white',
-                      boxShadow: '0 0 0 1px rgba(66, 153, 225, 0.6)'
+                      bg: useColorModeValue('white', '#3a3f4c'),
+                      boxShadow: useColorModeValue('0 0 0 1px rgba(66, 153, 225, 0.6)', 'none')
                     }}
                     pl={12}
                     h={12}
@@ -224,15 +231,15 @@ const Login = () => {
           <Box
             mt={6}
             p={4}
-            bg="blue.50"
+            bg={useColorModeValue('blue.50', 'primary.900')}
             borderRadius="xl"
             border="1px solid"
-            borderColor="blue.200"
+            borderColor={useColorModeValue('blue.200', 'primary.700')}
           >
-            <Text fontSize="xs" color="blue.700" fontWeight="500" mb={1}>
+            <Text fontSize="xs" color={useColorModeValue('blue.700', 'primary.200')} fontWeight="500" mb={1}>
               💡 Credenciales de demo:
             </Text>
-            <HStack spacing={4} fontSize="xs" color="blue.600">
+            <HStack spacing={4} fontSize="xs" color={useColorModeValue('blue.600', 'primary.300')}>
               <Text>Usuario: <Text as="span" fontWeight="bold">admin</Text></Text>
               <Text>Clave: <Text as="span" fontWeight="bold">admin</Text></Text>
             </HStack>
@@ -242,7 +249,7 @@ const Login = () => {
           <Text
             textAlign="center"
             fontSize="xs"
-            color="gray.500"
+            color={useColorModeValue('gray.500', 'app.text.tertiary')}
             mt={6}
           >
             © 2024 GPS Fleet Monitoring System
