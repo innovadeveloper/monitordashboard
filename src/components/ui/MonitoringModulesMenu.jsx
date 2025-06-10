@@ -55,15 +55,15 @@ const MonitoringModulesMenu = () => {
     {
       id: 'reproductor',
       name: 'Reproductor',
-      path: '/module3',
+      path: '/trackplayer',
       icon: Play,
-      description: 'Reproductor de video',
+      description: 'Reproductor de rutas',
       hasNavigation: true
     },
     {
       id: 'alertas',
       name: 'Alertas',
-      path: '/module3',
+      path: '/alerts',
       icon: AlertTriangle,
       description: 'Sistema de alertas',
       hasNavigation: true

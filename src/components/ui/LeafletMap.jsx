@@ -12,7 +12,14 @@ const LeafletMap = ({ buses, onBusClick }) => {
     // Initialize map only once
     if (!mapInstance.current) {
       // Centro de Lima, Peru
-      mapInstance.current = window.L.map(mapRef.current).setView([-12.0464, -77.0428], 13);
+      mapInstance.current = window.L.map(mapRef.current, {
+        zoomControl: false // Disable default zoom control
+      }).setView([-12.0464, -77.0428], 13);
+
+      // Add zoom control in bottom left position
+      window.L.control.zoom({
+        position: 'bottomleft'
+      }).addTo(mapInstance.current);
 
       // Add OpenStreetMap tile layer
       window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
