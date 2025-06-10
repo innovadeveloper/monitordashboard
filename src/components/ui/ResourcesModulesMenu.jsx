@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Button,
   Menu,
@@ -16,19 +16,16 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { 
-  Grid3X3, 
+  Settings, 
   ChevronDown, 
-  MapPin,
-  BarChart3,
-  Settings,
-  AlertTriangle,
   Users,
-  TrendingUp
+  Truck,
+  Route
 } from 'lucide-react';
 
-const ModulesMenu = () => {
-  const navigate = useNavigate();
+const ResourcesModulesMenu = ({ activeSubModule, onSubModuleChange }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const toast = useToast();
   const { isOpen: isModulesMenuOpen, onOpen: onModulesMenuOpen, onClose: onModulesMenuClose } = useDisclosure();
 
@@ -46,81 +43,64 @@ const ModulesMenu = () => {
     }
   }, [isModulesMenuOpen, onModulesMenuClose]);
 
-  const modules = [
+  const resourcesModules = [
     {
-      id: 'monitoring',
-      name: 'Monitoreo',
-      path: '/monitoring',
-      icon: MapPin,
-      description: 'Monitoreo GPS en tiempo real',
-      hasNavigation: true
-    },
-    {
-      id: 'operativa',
-      name: 'Operativa',
-      path: '/module3',
-      icon: Settings,
-      description: 'Gestión operativa',
-      hasNavigation: true
-    },
-    {
-      id: 'control',
-      name: 'Control y Alertas',
-      path: null,
-      icon: AlertTriangle,
-      description: 'Sistema de control y alertas',
-      hasNavigation: false
-    },
-    {
-      id: 'recursos',
-      name: 'Gestión de Recursos',
-      path: '/resources/flota',
+      id: 'personal',
+      name: 'Personal',
       icon: Users,
-      description: 'Administración de recursos',
-      hasNavigation: true
+      description: 'Gestión de conductores y personal'
     },
     {
-      id: 'analytics',
-      name: 'Analytics y Reportes',
-      path: null,
-      icon: TrendingUp,
-      description: 'Análisis y reportería',
-      hasNavigation: false
+      id: 'flota',
+      name: 'Flota',
+      icon: Truck,
+      description: 'Gestión de vehículos'
+    },
+    {
+      id: 'rutas',
+      name: 'Rutas',
+      icon: Route,
+      description: 'Gestión de rutas de transporte'
     }
   ];
 
   const handleModuleClick = (module) => {
-    if (module.hasNavigation && module.path) {
-      navigate(module.path);
-      onModulesMenuClose();
+    // Navigate to dedicated pages
+    const routeMap = {
+      'personal': '/resources/personal',
+      'flota': '/resources/flota',
+      'rutas': '/resources/rutas'
+    };
+    
+    const targetRoute = routeMap[module.id];
+    if (targetRoute) {
+      navigate(targetRoute);
     } else {
-      // Mostrar toast para módulos sin navegación
-      toast({
-        title: `${module.name}`,
-        description: `${module.description} - Próximamente disponible`,
-        status: 'info',
-        duration: 3000,
-        isClosable: true,
-        position: 'top'
-      });
-      onModulesMenuClose();
+      // Fallback to old behavior for compatibility
+      onSubModuleChange && onSubModuleChange(module.id);
     }
+    
+    onModulesMenuClose();
+    toast({
+      title: `Módulo cambiado`,
+      description: `Cambiando a ${module.name}`,
+      status: 'info',
+      duration: 2000,
+      isClosable: true,
+      position: 'top'
+    });
   };
 
   const getCurrentModuleName = () => {
-    // Incluir dashboard como módulo actual
-    if (location.pathname === '/dashboard') {
-      return 'Dashboard';
-    }
-    const currentModule = modules.find(module => module.path === location.pathname);
-    return currentModule ? currentModule.name : 'Módulos';
+    const currentModule = resourcesModules.find(module => module.id === activeSubModule);
+    return currentModule ? currentModule.name : 'Recursos';
   };
 
   return (
     <Menu isOpen={isModulesMenuOpen} onOpen={onModulesMenuOpen} onClose={onModulesMenuClose}>
       <MenuButton
         as={Button}
-        leftIcon={<Grid3X3 size={16} />}
+        leftIcon={<Settings size={16} />}
         rightIcon={<ChevronDown size={14} />}
         colorScheme="blue"
         size="sm"
@@ -147,10 +127,9 @@ const ModulesMenu = () => {
           minW="420px"
         >
           <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-            {modules.map((module, index) => {
+            {resourcesModules.map((module) => {
               const Icon = module.icon;
-              const isCurrentModule = location.pathname === module.path;
-              const isDashboardCurrent = location.pathname === '/dashboard';
+              const isCurrentModule = activeSubModule === module.id;
               
               return (
                 <GridItem 
@@ -171,9 +150,7 @@ const ModulesMenu = () => {
                     bg={
                       isCurrentModule 
                         ? useColorModeValue('blue.50', 'blue.900')
-                        : module.hasNavigation 
-                          ? useColorModeValue('white', '#35394a')
-                          : useColorModeValue('gray.50', '#2a2f3a')
+                        : useColorModeValue('white', '#35394a')
                     }
                     _hover={{
                       bg: useColorModeValue('blue.50', 'blue.900'),
@@ -187,7 +164,7 @@ const ModulesMenu = () => {
                     transition="all 0.2s"
                     cursor="pointer"
                     onClick={() => handleModuleClick(module)}
-                    opacity={isCurrentModule ? 0.9 : (module.hasNavigation ? 1 : 0.7)}
+                    opacity={isCurrentModule ? 0.9 : 1}
                     display="flex"
                     flexDirection="column"
                     alignItems="center"
@@ -199,9 +176,7 @@ const ModulesMenu = () => {
                         color={
                           isCurrentModule 
                             ? useColorModeValue('#3182CE', '#63B3ED')
-                            : module.hasNavigation
-                              ? useColorModeValue('#4A90E2', '#63B3ED')
-                              : useColorModeValue('#A0ADB8', '#718096')
+                            : useColorModeValue('#4A90E2', '#63B3ED')
                         } 
                       />
                       <Box textAlign="center">
@@ -211,9 +186,7 @@ const ModulesMenu = () => {
                           color={
                             isCurrentModule
                               ? useColorModeValue('blue.700', 'blue.200')
-                              : module.hasNavigation
-                                ? useColorModeValue('gray.700', '#e2e8f0')
-                                : useColorModeValue('gray.500', '#718096')
+                              : useColorModeValue('gray.700', '#e2e8f0')
                           }
                           lineHeight="1.2"
                           noOfLines={2}
@@ -223,11 +196,6 @@ const ModulesMenu = () => {
                         {isCurrentModule && (
                           <Text fontSize="xs" color="blue.500" mt={1}>
                             (Actual)
-                          </Text>
-                        )}
-                        {!module.hasNavigation && (
-                          <Text fontSize="xs" color="gray.400" mt={1}>
-                            Próximamente
                           </Text>
                         )}
                       </Box>
@@ -243,4 +211,4 @@ const ModulesMenu = () => {
   );
 };
 
-export default ModulesMenu;
+export default ResourcesModulesMenu;

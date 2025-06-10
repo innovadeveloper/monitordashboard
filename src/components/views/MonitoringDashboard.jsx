@@ -716,11 +716,11 @@ const MonitoringDashboard = () => {
 
                   <VStack spacing={3} mb={4}>
                     <Input
+                      borderRadius="10px"
                       placeholder="Buscar por placa o conductor..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       size="sm"
-                      borderRadius="12px"
                       border="1px solid"
                       borderColor={useColorModeValue('gray.200', 'transparent')}
                       bg={useColorModeValue('white', '#2a2f3a')}
