@@ -32,7 +32,7 @@ import {
   IconButton,
   useColorMode,
 } from '@chakra-ui/react';
-import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin, Route, Navigation, ChevronLeft, ChevronRight, Phone, MessageCircle, ImageIcon, Send, ArrowLeft, ArrowRight, Sun, Moon } from 'lucide-react';
+import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin, Route, Navigation, ChevronLeft, ChevronRight, Phone, MessageCircle, ImageIcon, Send, ArrowLeft, ArrowRight, Sun, Moon, Grid3X3, Video, Settings, Monitor } from 'lucide-react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -187,6 +187,7 @@ const MonitoringDashboard = () => {
   const { isOpen: isCallModalOpen, onOpen: onCallModalOpen, onClose: onCallModalClose } = useDisclosure();
   const { isOpen: isPictureModalOpen, onOpen: onPictureModalOpen, onClose: onPictureModalClose } = useDisclosure();
   const { isOpen: isRecentPictureModalOpen, onOpen: onRecentPictureModalOpen, onClose: onRecentPictureModalClose } = useDisclosure();
+  const { isOpen: isModulesMenuOpen, onOpen: onModulesMenuOpen, onClose: onModulesMenuClose } = useDisclosure();
   const [selectedBusForTTS, setSelectedBusForTTS] = useState(null);
   const [selectedPhotoData, setSelectedPhotoData] = useState(null);
   const [selectedBusForCall, setSelectedBusForCall] = useState(null);
@@ -432,6 +433,20 @@ const MonitoringDashboard = () => {
     }
   };
 
+  // Handle escape key for modules menu
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isModulesMenuOpen) {
+        onModulesMenuClose();
+      }
+    };
+
+    if (isModulesMenuOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isModulesMenuOpen, onModulesMenuClose]);
+
   // Modal photo navigation functions
   const handleModalPrevPhoto = () => {
     if (selectedPhotoData && selectedPhotoData.totalPhotos > 1) {
@@ -617,15 +632,6 @@ const MonitoringDashboard = () => {
             </HStack>
 
             <HStack spacing={4}>
-              <Button
-                leftIcon={<Bell size={16} />}
-                colorScheme="red"
-                size="sm"
-                variant="solid"
-              >
-                Centro de Alertas
-              </Button>
-              
               {/* Theme Toggle Button */}
               <IconButton
                 icon={colorMode === 'light' ? <Moon size={16} /> : <Sun size={16} />}
@@ -638,6 +644,178 @@ const MonitoringDashboard = () => {
                 }}
                 aria-label={colorMode === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
               />
+
+              {/* Modules Menu */}
+              <Menu isOpen={isModulesMenuOpen} onOpen={onModulesMenuOpen} onClose={onModulesMenuClose}>
+                <MenuButton
+                  as={Button}
+                  leftIcon={<Grid3X3 size={16} />}
+                  rightIcon={<ChevronDown size={14} />}
+                  colorScheme="blue"
+                  size="sm"
+                  variant="solid"
+                  _hover={{
+                    bg: 'blue.600',
+                    transform: 'translateY(-1px)',
+                    boxShadow: 'lg'
+                  }}
+                  _active={{
+                    transform: 'translateY(0px)',
+                  }}
+                  transition="all 0.2s"
+                >
+                  Módulos
+                </MenuButton>
+                <Portal>
+                  <MenuList
+                    bg={useColorModeValue('white', '#2f3441')}
+                    borderColor={useColorModeValue('gray.200', 'gray.600')}
+                    boxShadow="xl"
+                    borderRadius="xl"
+                    p={4}
+                    minW="320px"
+                  >
+                    <Grid templateColumns="1fr 1fr" gap={3}>
+                      <GridItem>
+                        <Box
+                          as="button"
+                          w="100%"
+                          p={4}
+                          borderRadius="lg"
+                          border="1px solid"
+                          borderColor={useColorModeValue('gray.200', 'gray.600')}
+                          bg={useColorModeValue('white', '#35394a')}
+                          _hover={{
+                            bg: useColorModeValue('blue.50', 'blue.900'),
+                            borderColor: useColorModeValue('blue.300', 'blue.600'),
+                            transform: 'translateY(-2px)',
+                            boxShadow: 'md'
+                          }}
+                          _active={{
+                            transform: 'translateY(0px)'
+                          }}
+                          transition="all 0.2s"
+                          cursor="pointer"
+                        >
+                          <VStack spacing={2}>
+                            <MapPin size={24} color={useColorModeValue('#4A90E2', '#63B3ED')} />
+                            <Text 
+                              fontSize="sm" 
+                              fontWeight="medium" 
+                              color={useColorModeValue('gray.700', '#e2e8f0')}
+                              textAlign="center"
+                            >
+                              Localizador GPS
+                            </Text>
+                          </VStack>
+                        </Box>
+                      </GridItem>
+                      <GridItem>
+                        <Box
+                          as="button"
+                          w="100%"
+                          p={4}
+                          borderRadius="lg"
+                          border="1px solid"
+                          borderColor={useColorModeValue('gray.200', 'gray.600')}
+                          bg={useColorModeValue('white', '#35394a')}
+                          _hover={{
+                            bg: useColorModeValue('blue.50', 'blue.900'),
+                            borderColor: useColorModeValue('blue.300', 'blue.600'),
+                            transform: 'translateY(-2px)',
+                            boxShadow: 'md'
+                          }}
+                          _active={{
+                            transform: 'translateY(0px)'
+                          }}
+                          transition="all 0.2s"
+                          cursor="pointer"
+                        >
+                          <VStack spacing={2}>
+                            <Video size={24} color={useColorModeValue('#4A90E2', '#63B3ED')} />
+                            <Text 
+                              fontSize="sm" 
+                              fontWeight="medium" 
+                              color={useColorModeValue('gray.700', '#e2e8f0')}
+                              textAlign="center"
+                            >
+                              Reproductor de Video
+                            </Text>
+                          </VStack>
+                        </Box>
+                      </GridItem>
+                      <GridItem>
+                        <Box
+                          as="button"
+                          w="100%"
+                          p={4}
+                          borderRadius="lg"
+                          border="1px solid"
+                          borderColor={useColorModeValue('gray.200', 'gray.600')}
+                          bg={useColorModeValue('white', '#35394a')}
+                          _hover={{
+                            bg: useColorModeValue('blue.50', 'blue.900'),
+                            borderColor: useColorModeValue('blue.300', 'blue.600'),
+                            transform: 'translateY(-2px)',
+                            boxShadow: 'md'
+                          }}
+                          _active={{
+                            transform: 'translateY(0px)'
+                          }}
+                          transition="all 0.2s"
+                          cursor="pointer"
+                        >
+                          <VStack spacing={2}>
+                            <Monitor size={24} color={useColorModeValue('#4A90E2', '#63B3ED')} />
+                            <Text 
+                              fontSize="sm" 
+                              fontWeight="medium" 
+                              color={useColorModeValue('gray.700', '#e2e8f0')}
+                              textAlign="center"
+                            >
+                              Módulo 3
+                            </Text>
+                          </VStack>
+                        </Box>
+                      </GridItem>
+                      <GridItem>
+                        <Box
+                          as="button"
+                          w="100%"
+                          p={4}
+                          borderRadius="lg"
+                          border="1px solid"
+                          borderColor={useColorModeValue('gray.200', 'gray.600')}
+                          bg={useColorModeValue('white', '#35394a')}
+                          _hover={{
+                            bg: useColorModeValue('blue.50', 'blue.900'),
+                            borderColor: useColorModeValue('blue.300', 'blue.600'),
+                            transform: 'translateY(-2px)',
+                            boxShadow: 'md'
+                          }}
+                          _active={{
+                            transform: 'translateY(0px)'
+                          }}
+                          transition="all 0.2s"
+                          cursor="pointer"
+                        >
+                          <VStack spacing={2}>
+                            <Settings size={24} color={useColorModeValue('#4A90E2', '#63B3ED')} />
+                            <Text 
+                              fontSize="sm" 
+                              fontWeight="medium" 
+                              color={useColorModeValue('gray.700', '#e2e8f0')}
+                              textAlign="center"
+                            >
+                              Módulo 4
+                            </Text>
+                          </VStack>
+                        </Box>
+                      </GridItem>
+                    </Grid>
+                  </MenuList>
+                </Portal>
+              </Menu>
               
               <Menu>
                 <MenuButton
