@@ -18,7 +18,7 @@ import {
   Icon
 } from '@chakra-ui/react';
 import { User, Lock, Bus } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({

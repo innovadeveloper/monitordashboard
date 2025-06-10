@@ -20,7 +20,7 @@ import {
   Volume2, 
   VolumeX 
 } from 'lucide-react';
-import CloseConfirmationDialog from './CloseConfirmationDialog';
+import CloseConfirmationDialog from '../modals/CloseConfirmationDialog';
 
 const EnhancedCameraPanel = ({ 
   panel, 

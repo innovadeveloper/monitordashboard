@@ -38,22 +38,28 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 
 // 1. IMPORTS - Agregar al inicio del archivo
 import { ChakraProvider } from '@chakra-ui/react';
-import theme from '../theme';
-import ViewModeSelector from './ViewModeSelector';
+import theme from '../../theme';
+// UI Components
+import {
+  ViewModeSelector,
+  ContextMenu,
+  EnhancedCameraPanel,
+  MaterialRouteSelector,
+  BusItem,
+  LeafletMap
+} from '../ui';
 
-// 1. Importar los nuevos componentes
-import ContextMenu from './ContextMenu';
-import EnhancedCameraPanel from './EnhancedCameraPanel';
-import MaterialRouteSelector from './MaterialRouteSelector';
-import BusItem from './BusItem';
-import CameraSelectionModal from './CameraSelectionModal';
-import MensajeTTSModal from './MensajeTTSModal';
-import RecentPictureModal from './RecentPictureModal';
-import CallWebRTCModal from './CallWebRTCModal';
-import TakePictureModal from './TakePictureModal';
-import LeafletMap from './LeafletMap';
-import { useContextMenu } from '../hooks/useContextMenu';
-import { useAuth } from '../contexts/AuthContext';
+// Modals
+import {
+  CameraSelectionModal,
+  MensajeTTSModal,
+  RecentPictureModal,
+  CallWebRTCModal,
+  TakePictureModal
+} from '../modals';
+// Hooks and Contexts
+import { useContextMenu } from '../../hooks';
+import { useAuth } from '../../contexts/AuthContext';
 
 
 const mockBuses = [

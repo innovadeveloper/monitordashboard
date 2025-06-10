@@ -3,8 +3,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import MonitoringDashboard from './components/MonitoringDashboard';
-import Login from './components/Login';
+import { MonitoringDashboard, Login } from './components/views';
 import theme from './theme';
 import { Box, Spinner, Flex } from '@chakra-ui/react';
 

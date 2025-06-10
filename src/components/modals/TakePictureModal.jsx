@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 // Import camera configuration
-import { getCamerasForVehicle, getCameraSettings } from '../config/cameras';
+import { getCamerasForVehicle, getCameraSettings } from '../../config/cameras';
 
 // Animaciones keyframes
 const pulseCamera = keyframes`
