@@ -69,12 +69,14 @@ const CameraSelectionModal = ({ isOpen, onClose, bus, onCameraSelect }) => {
                     role="group"
                     _hover={{
                       borderColor: useColorModeValue('blue.500', 'primary.400'),
-                      bg: useColorModeValue('blue.50', 'white'),
+                      bg: useColorModeValue('blue.50', 'primary.800'),
+                      transform: 'translateY(-2px)',
+                      boxShadow: 'md',
                       '& .camera-text': {
-                        color: useColorModeValue('gray.800', 'gray.800')
+                        color: useColorModeValue('gray.800', '#e2e8f0')
                       },
                       '& .camera-desc': {
-                        color: useColorModeValue('gray.600', 'gray.600')
+                        color: useColorModeValue('gray.600', '#a0aec0')
                       }
                     }}
                     onClick={() => onCameraSelect(camera.type)}

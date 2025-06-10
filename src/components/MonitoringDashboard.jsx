@@ -47,6 +47,9 @@ import EnhancedCameraPanel from './EnhancedCameraPanel';
 import MaterialRouteSelector from './MaterialRouteSelector';
 import BusItem from './BusItem';
 import CameraSelectionModal from './CameraSelectionModal';
+import MensajeTTSModal from './MensajeTTSModal';
+import CallWebRTCModal from './CallWebRTCModal';
+import TakePictureModal from './TakePictureModal';
 import LeafletMap from './LeafletMap';
 import { useContextMenu } from '../hooks/useContextMenu';
 import { useAuth } from '../contexts/AuthContext';
@@ -149,7 +152,11 @@ const MonitoringDashboard = () => {
 
   // 3. ESTADOS ADICIONALES - Reemplazar/agregar después de los estados existentes:
   const [globalViewMode, setGlobalViewMode] = useState('2x2');
-  const [isMapView, setIsMapView] = useState(false);
+  const [isMapView, setIsMapView] = useState(() => {
+    // Recuperar desde localStorage o usar false por defecto
+    const savedViewState = localStorage.getItem('gps-fleet-view-mode');
+    return savedViewState ? JSON.parse(savedViewState) : false;
+  });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedBusForPanel, setSelectedBusForPanel] = useState(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -175,6 +182,12 @@ const MonitoringDashboard = () => {
   ]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isTTSModalOpen, onOpen: onTTSModalOpen, onClose: onTTSModalClose } = useDisclosure();
+  const { isOpen: isCallModalOpen, onOpen: onCallModalOpen, onClose: onCallModalClose } = useDisclosure();
+  const { isOpen: isPictureModalOpen, onOpen: onPictureModalOpen, onClose: onPictureModalClose } = useDisclosure();
+  const [selectedBusForTTS, setSelectedBusForTTS] = useState(null);
+  const [selectedBusForCall, setSelectedBusForCall] = useState(null);
+  const [selectedBusForPicture, setSelectedBusForPicture] = useState(null);
   const toast = useToast();
 
   const bgColor = useColorModeValue('app.bg.primary', 'app.bg.primary');
@@ -243,6 +256,11 @@ const MonitoringDashboard = () => {
     };
   }, [toast]);
 
+  // Sync view state changes to localStorage (backup effect)
+  useEffect(() => {
+    localStorage.setItem('gps-fleet-view-mode', JSON.stringify(isMapView));
+  }, [isMapView]);
+
   const handleBusClick = (busId) => {
     // Always select the clicked bus (replace previous selection)
     setSelectedBus(busId);
@@ -305,18 +323,22 @@ const MonitoringDashboard = () => {
   };
 
   const handleMapToggle = () => {
-    setIsMapView(!isMapView);
+    const newMapViewState = !isMapView;
+    setIsMapView(newMapViewState);
+
+    // Guardar estado en localStorage
+    localStorage.setItem('gps-fleet-view-mode', JSON.stringify(newMapViewState));
 
     // When switching to map view, show panel but no bus selected initially
-    if (!isMapView) {
+    if (newMapViewState) {
       setSelectedBusForPanel(null);
       setIsRightPanelVisible(true);
       setCurrentPhotoIndex(0);
     }
 
     toast({
-      title: isMapView ? 'Vista de Video Digital' : 'Vista de Mapa Central',
-      description: isMapView ? 'Cambiando a vista de cámaras' : 'Cambiando a vista de mapa GPS',
+      title: newMapViewState ? 'Vista de Mapa Central' : 'Vista de Video Digital',
+      description: newMapViewState ? 'Cambiando a vista de mapa GPS' : 'Cambiando a vista de cámaras',
       status: 'info',
       duration: 2000,
       isClosable: true,
@@ -347,19 +369,29 @@ const MonitoringDashboard = () => {
 
   // Communication functions
   const handleCall = (bus) => {
+    setSelectedBusForCall(bus);
+    onCallModalOpen();
+  };
+
+  const handleCallEnd = (bus, duration) => {
     toast({
-      title: 'Llamando...',
-      description: `Iniciando llamada a ${bus.conductor} (${bus.telefono})`,
+      title: 'Llamada finalizada',
+      description: `Llamada con ${bus.conductor} - Duración: ${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`,
       status: 'info',
-      duration: 3000,
+      duration: 4000,
       isClosable: true,
     });
   };
 
   const handleTTSMessage = (bus) => {
+    setSelectedBusForTTS(bus);
+    onTTSModalOpen();
+  };
+
+  const handleSendTTSMessage = (bus, message) => {
     toast({
       title: 'Mensaje TTS enviado',
-      description: `Mensaje de voz enviado a ${bus.conductor}`,
+      description: `Mensaje "${message.substring(0, 30)}..." enviado a ${bus.conductor}`,
       status: 'success',
       duration: 3000,
       isClosable: true,
@@ -367,11 +399,19 @@ const MonitoringDashboard = () => {
   };
 
   const handleRequestPhoto = (bus) => {
+    setSelectedBusForPicture(bus);
+    onPictureModalOpen();
+  };
+
+  const handlePictureTaken = (bus, capturedResults) => {
+    const successCount = capturedResults.filter(r => r.success).length;
+    const totalCount = capturedResults.length;
+    
     toast({
-      title: 'Solicitando foto...',
-      description: `Foto solicitada al conductor ${bus.conductor}`,
-      status: 'info',
-      duration: 3000,
+      title: 'Fotos capturadas',
+      description: `${successCount}/${totalCount} fotos tomadas del vehículo ${bus.id}`,
+      status: successCount > 0 ? 'success' : 'error',
+      duration: 4000,
       isClosable: true,
     });
   };
@@ -593,30 +633,8 @@ const MonitoringDashboard = () => {
             </HStack>
           </Flex>
 
-          {/* Status Bar */}
-          <Flex bg={useColorModeValue('white', '#252a36')} px={6} py={3} borderBottom="1px" borderColor={useColorModeValue('gray.200', 'transparent')}>
-            <HStack spacing={8}>
-              <HStack>
-                <Box w={3} h={3} bg="app.status.error" borderRadius="full" />
-                <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>3 Alertas Críticas</Text>
-              </HStack>
-              <HStack>
-                <Box w={3} h={3} bg="app.status.warning" borderRadius="full" />
-                <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>7 Advertencias</Text>
-              </HStack>
-              <HStack>
-                <Box w={3} h={3} bg="app.status.active" borderRadius="full" />
-                <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>85 Unidades Activas</Text>
-              </HStack>
-              <HStack>
-                <Box w={3} h={3} bg="app.status.warning" borderRadius="full" />
-                <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>5 Con Retraso</Text>
-              </HStack>
-            </HStack>
-          </Flex>
-
           {/* Main Content */}
-          <Flex h="calc(100vh - 120px)" position="relative">
+          <Flex h="calc(100vh - 80px)" position="relative">
             {/* Left Sidebar - Bus List */}
             <Box
               w={isSidebarCollapsed ? "0px" : "320px"}
@@ -782,38 +800,8 @@ const MonitoringDashboard = () => {
                   position="relative"
                   overflow="hidden"
                 >
-                  {/* Map Header */}
-                  <Flex
-                    bg={useColorModeValue('white', '#2f3441')}
-                    p={4}
-                    borderBottom="1px solid"
-                    borderColor={useColorModeValue('gray.200', 'transparent')}
-                    align="center"
-                    justify="space-between"
-                  >
-                    <HStack spacing={3}>
-                      <Box>
-                        <Text fontSize="lg" fontWeight="bold" color={useColorModeValue('gray.800', 'app.text.primary')}>
-                          Mapa GPS en Tiempo Real - Lima, Perú
-                        </Text>
-                        <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>
-                          {filteredBuses.length} unidades monitoreadas
-                        </Text>
-                      </Box>
-                    </HStack>
-
-                    <HStack spacing={2}>
-                      <Button size="sm" leftIcon={<Navigation size={16} />} colorScheme="blue">
-                        Centrar Vista
-                      </Button>
-                      <Button size="sm" leftIcon={<Route size={16} />} variant="outline">
-                        Rutas
-                      </Button>
-                    </HStack>
-                  </Flex>
-
                   {/* Leaflet Map Container */}
-                  <Flex w="100%" h="calc(100% - 80px)" position="relative">
+                  <Flex w="100%" h="100%" position="relative">
                     {/* Map Container */}
                     <Box
                       w={isRightPanelVisible ? "80%" : "100%"}
@@ -1138,6 +1126,30 @@ const MonitoringDashboard = () => {
             onClose={onClose}
             bus={draggedBus}
             onCameraSelect={handleCameraSelect}
+          />
+
+          {/* Mensaje TTS Modal */}
+          <MensajeTTSModal
+            isOpen={isTTSModalOpen}
+            onClose={onTTSModalClose}
+            bus={selectedBusForTTS}
+            onSendMessage={handleSendTTSMessage}
+          />
+
+          {/* Call WebRTC Modal */}
+          <CallWebRTCModal
+            isOpen={isCallModalOpen}
+            onClose={onCallModalClose}
+            bus={selectedBusForCall}
+            onCallEnd={handleCallEnd}
+          />
+
+          {/* Take Picture Modal */}
+          <TakePictureModal
+            isOpen={isPictureModalOpen}
+            onClose={onPictureModalClose}
+            bus={selectedBusForPicture}
+            onPictureTaken={handlePictureTaken}
           />
 
           {/* Context Menu */}
