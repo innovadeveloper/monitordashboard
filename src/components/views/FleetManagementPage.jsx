@@ -35,7 +35,6 @@ import theme from '../../theme';
 
 // Sub-modules
 import VehicleRegistrySubModule from './VehicleRegistrySubModule';
-import MaintenanceManagementSubModule from './MaintenanceManagementSubModule';
 
 // UI Components
 import { ResourcesModulesMenu } from '../ui';
@@ -61,13 +60,6 @@ const FleetManagementPage = () => {
       icon: Truck,
       description: 'Datos de vehículos y especificaciones',
       component: VehicleRegistrySubModule
-    },
-    {
-      id: 'mantenimiento',
-      name: 'Gestión de Mantenimiento',
-      icon: Plus,
-      description: 'Mantenimiento preventivo y correctivo',
-      component: MaintenanceManagementSubModule
     }
   ];
 

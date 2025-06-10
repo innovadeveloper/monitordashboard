@@ -136,6 +136,21 @@ const PersonalSubModulePage = () => {
           size="sm"
           w="400px"
           leftElement={<Search size={16} />}
+          borderRadius="xl"
+          border="1px solid"
+          borderColor={useColorModeValue('gray.200', 'transparent')}
+          bg={useColorModeValue('white', '#2a2f3a')}
+          color={useColorModeValue('gray.800', '#e2e8f0')}
+          _placeholder={{ color: useColorModeValue('gray.500', '#718096') }}
+          _hover={{ 
+            borderColor: useColorModeValue('blue.300', 'primary.600'),
+            bg: useColorModeValue('gray.50', '#2f3441')
+          }}
+          _focus={{ 
+            borderColor: useColorModeValue('blue.500', 'primary.500'), 
+            boxShadow: useColorModeValue('0 0 0 1px rgba(66, 153, 225, 0.6)', 'none'),
+            bg: useColorModeValue('white', '#2f3441')
+          }}
         />
         <Button
           leftIcon={<Search size={16} />}
