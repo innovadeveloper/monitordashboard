@@ -12,3 +12,4 @@ export { default as RouteManagementPage } from './RouteManagementPage';
 export { default as PersonalSubModulePage } from './PersonalSubModulePage';
 export { default as FleetSubModulePage } from './FleetSubModulePage';
 export { default as RouteSubModulePage } from './RouteSubModulePage';
+export { default as SystemManagementPage } from './SystemManagementPage';

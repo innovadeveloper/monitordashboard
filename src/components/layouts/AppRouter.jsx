@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Dashboard, MonitoringDashboard, Module3, TrackPlayerPage, AlertPlayerPage, ResourceManagementPage, PersonalManagementPage, FleetManagementPage, RouteManagementPage } from '../views';
+import { Dashboard, MonitoringDashboard, Module3, TrackPlayerPage, AlertPlayerPage, ResourceManagementPage, PersonalManagementPage, FleetManagementPage, RouteManagementPage, SystemManagementPage } from '../views';
 
 const AppRouter = () => {
   return (
@@ -17,6 +17,7 @@ const AppRouter = () => {
       <Route path="/resources/personal" element={<PersonalManagementPage />} />
       <Route path="/resources/flota" element={<FleetManagementPage />} />
       <Route path="/resources/rutas" element={<RouteManagementPage />} />
+      <Route path="/system" element={<SystemManagementPage />} />
       <Route path="/module3" element={<Module3 />} />
       
       {/* Catch all route - redirect to dashboard */}

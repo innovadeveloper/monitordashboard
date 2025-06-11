@@ -18,8 +18,10 @@ import {
   IconButton,
   HStack,
   Center,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { Search, Eye, Edit, UserPlus, Phone, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PersonRegistrationModal } from '../modals';
 
 // Mock data for personas
 const mockPersonas = [
@@ -197,6 +199,8 @@ const RegistroPersonasSubModule = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredPersonas, setFilteredPersonas] = useState(mockPersonas);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPerson, setSelectedPerson] = useState(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const itemsPerPage = 5;
 
   // Calculate pagination
@@ -226,6 +230,30 @@ const RegistroPersonasSubModule = () => {
 
   const handleNextPage = () => {
     setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
+  const handleNewPerson = () => {
+    setSelectedPerson(null);
+    onOpen();
+  };
+
+  const handleEditPerson = (persona) => {
+    setSelectedPerson(persona);
+    onOpen();
+  };
+
+  const handleSavePerson = (personData) => {
+    if (selectedPerson) {
+      // Update existing person
+      const updatedPersonas = mockPersonas.map(p => 
+        p.id === selectedPerson.id ? personData : p
+      );
+      setFilteredPersonas(updatedPersonas);
+    } else {
+      // Add new person
+      const newPersonas = [...mockPersonas, personData];
+      setFilteredPersonas(newPersonas);
+    }
   };
 
   const getEstadoColor = (estado) => {
@@ -263,6 +291,7 @@ const RegistroPersonasSubModule = () => {
           leftIcon={<UserPlus size={16} />}
           colorScheme="blue"
           size="sm"
+          onClick={handleNewPerson}
         >
           Nueva Persona
         </Button>
@@ -417,6 +446,7 @@ const RegistroPersonasSubModule = () => {
                         colorScheme="green"
                         variant="ghost"
                         aria-label="Editar"
+                        onClick={() => handleEditPerson(persona)}
                       />
                     </HStack>
                   </Td>
@@ -473,6 +503,14 @@ const RegistroPersonasSubModule = () => {
           Mostrando {startIndex + 1}-{Math.min(endIndex, filteredPersonas.length)} de {filteredPersonas.length} elementos
         </Text>
       </Center>
+
+      {/* Person Registration Modal */}
+      <PersonRegistrationModal
+        isOpen={isOpen}
+        onClose={onClose}
+        person={selectedPerson}
+        onSave={handleSavePerson}
+      />
     </Box>
   );
 };

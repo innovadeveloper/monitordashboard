@@ -23,7 +23,8 @@ import {
   Settings,
   AlertTriangle,
   Users,
-  TrendingUp
+  TrendingUp,
+  Shield
 } from 'lucide-react';
 
 const ModulesMenu = () => {
@@ -86,6 +87,14 @@ const ModulesMenu = () => {
       icon: TrendingUp,
       description: 'Análisis y reportería',
       hasNavigation: false
+    },
+    {
+      id: 'system',
+      name: 'Administración del Sistema',
+      path: '/system',
+      icon: Shield,
+      description: 'Gestión de roles y configuración',
+      hasNavigation: true
     }
   ];
 
