@@ -26,6 +26,7 @@ import {
   Center,
 } from '@chakra-ui/react';
 import { Search, Eye, Edit, UserPlus, Clock, Award, BookOpen, Car, ChevronLeft, ChevronRight } from 'lucide-react';
+import { DriverDetailModal } from '../modals';
 
 // Mock data for conductores
 const mockConductores = [
@@ -425,6 +426,8 @@ const GestionConductoresSubModule = () => {
   const [selectedConductor, setSelectedConductor] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [isDriverDetailModalOpen, setIsDriverDetailModalOpen] = useState(false);
+  const [driverToEdit, setDriverToEdit] = useState(null);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredConductores.length / itemsPerPage);
@@ -495,6 +498,32 @@ const GestionConductoresSubModule = () => {
       case 'Pendiente': return 'orange';
       default: return 'gray';
     }
+  };
+
+  // Handle driver detail modal
+  const handleDriverClick = (conductor) => {
+    setDriverToEdit(conductor);
+    setIsDriverDetailModalOpen(true);
+  };
+
+  const handleSaveDriver = (updatedDriver) => {
+    // Update the conductor in the list
+    const updatedConductores = mockConductores.map(conductor => 
+      conductor.id === updatedDriver.id ? updatedDriver : conductor
+    );
+    setFilteredConductores(updatedConductores);
+    
+    // Update selected conductor if it's the same one
+    if (selectedConductor?.id === updatedDriver.id) {
+      setSelectedConductor(updatedDriver);
+    }
+    
+    setIsDriverDetailModalOpen(false);
+  };
+
+  const handleCloseDriverModal = () => {
+    setIsDriverDetailModalOpen(false);
+    setDriverToEdit(null);
   };
 
   return (
@@ -651,6 +680,10 @@ const GestionConductoresSubModule = () => {
                           colorScheme="blue"
                           variant="ghost"
                           aria-label="Ver detalles"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDriverClick(conductor);
+                          }}
                         />
                         <IconButton
                           icon={<Edit size={12} />}
@@ -658,6 +691,10 @@ const GestionConductoresSubModule = () => {
                           colorScheme="green"
                           variant="ghost"
                           aria-label="Editar"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDriverClick(conductor);
+                          }}
                         />
                       </HStack>
                     </Td>
@@ -889,6 +926,14 @@ const GestionConductoresSubModule = () => {
           )}
         </Box>
       </Flex>
+
+      {/* Driver Detail Modal */}
+      <DriverDetailModal
+        isOpen={isDriverDetailModalOpen}
+        onClose={handleCloseDriverModal}
+        driver={driverToEdit}
+        onSave={handleSaveDriver}
+      />
     </Box>
   );
 };

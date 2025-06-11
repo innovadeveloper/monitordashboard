@@ -6,3 +6,4 @@ export { default as MensajeTTSModal } from './MensajeTTSModal';
 export { default as RecentPictureModal } from './RecentPictureModal';
 export { default as TakePictureModal } from './TakePictureModal';
 export { default as PersonRegistrationModal } from './PersonRegistrationModal';
+export { default as DriverDetailModal } from './DriverDetailModal';
