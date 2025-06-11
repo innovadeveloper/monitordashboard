@@ -47,9 +47,10 @@ import {
   EnhancedCameraPanel,
   MaterialRouteSelector,
   BusItem,
-  LeafletMap,
+  GoogleMap,
   MonitoringModulesMenu
 } from '../ui';
+
 
 // Modals
 import {
@@ -427,6 +428,7 @@ const MonitoringDashboard = () => {
       isClosable: true,
     });
   };
+
 
   // Photo carousel functions
   const nextPhoto = (bus) => {
@@ -871,7 +873,7 @@ const MonitoringDashboard = () => {
                       h="100%"
                       transition="all 0.3s ease-in-out"
                     >
-                      <LeafletMap
+                      <GoogleMap
                         buses={filteredBuses}
                         onBusClick={(bus) => {
                           setSelectedBusForPanel(bus);
