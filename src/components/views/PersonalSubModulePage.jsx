@@ -17,8 +17,9 @@ import {
   Badge,
   IconButton,
   HStack,
+  Center,
 } from '@chakra-ui/react';
-import { Search, Eye, Edit, UserPlus } from 'lucide-react';
+import { Search, Eye, Edit, UserPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mock data for personal
 const mockPersonal = [
@@ -81,12 +82,140 @@ const mockPersonal = [
     fechaIngreso: "2024-02-28",
     licencia: "A-IIb",
     experiencia: "2 años"
+  },
+  {
+    id: "P006",
+    nombre: "Laura Beatriz Ramírez",
+    documento: "67890123",
+    cargo: "Conductora",
+    telefono: "+51 999 678 901",
+    email: "laura.ramirez@empresa.com",
+    estado: "Activo",
+    fechaIngreso: "2023-06-12",
+    licencia: "A-IIb",
+    experiencia: "4 años"
+  },
+  {
+    id: "P007",
+    nombre: "Diego Alejandro Morales",
+    documento: "78901234",
+    cargo: "Conductor",
+    telefono: "+51 999 789 012",
+    email: "diego.morales@empresa.com",
+    estado: "Activo",
+    fechaIngreso: "2022-12-05",
+    licencia: "A-IIb",
+    experiencia: "6 años"
+  },
+  {
+    id: "P008",
+    nombre: "Carmen Rosa Vega",
+    documento: "89012345",
+    cargo: "Jefa de Operaciones",
+    telefono: "+51 999 890 123",
+    email: "carmen.vega@empresa.com",
+    estado: "Activo",
+    fechaIngreso: "2020-04-18",
+    licencia: "A-I",
+    experiencia: "12 años"
+  },
+  {
+    id: "P009",
+    nombre: "Fernando José Castillo",
+    documento: "90123456",
+    cargo: "Conductor",
+    telefono: "+51 999 901 234",
+    email: "fernando.castillo@empresa.com",
+    estado: "Vacaciones",
+    fechaIngreso: "2023-09-30",
+    licencia: "A-IIb",
+    experiencia: "3 años"
+  },
+  {
+    id: "P010",
+    nombre: "Patricia Luz Herrera",
+    documento: "01234567",
+    cargo: "Supervisora",
+    telefono: "+51 999 012 345",
+    email: "patricia.herrera@empresa.com",
+    estado: "Activo",
+    fechaIngreso: "2021-07-22",
+    licencia: "A-I",
+    experiencia: "8 años"
+  },
+  {
+    id: "P011",
+    nombre: "Andrés Mateo Delgado",
+    documento: "11234567",
+    cargo: "Conductor",
+    telefono: "+51 999 112 345",
+    email: "andres.delgado@empresa.com",
+    estado: "Activo",
+    fechaIngreso: "2024-01-08",
+    licencia: "A-IIb",
+    experiencia: "1 año"
+  },
+  {
+    id: "P012",
+    nombre: "Isabel María Jiménez",
+    documento: "22345678",
+    cargo: "Conductora",
+    telefono: "+51 999 223 456",
+    email: "isabel.jimenez@empresa.com",
+    estado: "Inactivo",
+    fechaIngreso: "2023-11-14",
+    licencia: "A-IIb",
+    experiencia: "2 años"
+  },
+  {
+    id: "P013",
+    nombre: "Ricardo Eduardo Vargas",
+    documento: "33456789",
+    cargo: "Mecánico",
+    telefono: "+51 999 334 567",
+    email: "ricardo.vargas@empresa.com",
+    estado: "Activo",
+    fechaIngreso: "2022-05-16",
+    licencia: "N/A",
+    experiencia: "9 años"
+  },
+  {
+    id: "P014",
+    nombre: "Mónica Esperanza Cruz",
+    documento: "44567890",
+    cargo: "Asistente Administrativa",
+    telefono: "+51 999 445 678",
+    email: "monica.cruz@empresa.com",
+    estado: "Activo",
+    fechaIngreso: "2023-04-03",
+    licencia: "N/A",
+    experiencia: "4 años"
+  },
+  {
+    id: "P015",
+    nombre: "Gabriel Antonio Mendoza",
+    documento: "55678901",
+    cargo: "Conductor",
+    telefono: "+51 999 556 789",
+    email: "gabriel.mendoza@empresa.com",
+    estado: "Activo",
+    fechaIngreso: "2023-08-27",
+    licencia: "A-IIb",
+    experiencia: "3 años"
   }
 ];
 
 const PersonalSubModulePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredPersonal, setFilteredPersonal] = useState(mockPersonal);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredPersonal.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredPersonal.slice(startIndex, endIndex);
 
   React.useEffect(() => {
     const filtered = mockPersonal.filter(person =>
@@ -95,7 +224,20 @@ const PersonalSubModulePage = () => {
       person.cargo.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredPersonal(filtered);
+    setCurrentPage(1); // Reset to first page when filtering
   }, [searchTerm]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
 
   const getEstadoColor = (estado) => {
     switch (estado) {
@@ -218,7 +360,7 @@ const PersonalSubModulePage = () => {
         >
           <Table variant="simple" size="sm" style={{ tableLayout: 'fixed' }}>
             <Tbody>
-              {filteredPersonal.map((person) => (
+              {currentItems.map((person) => (
                 <Tr key={person.id} _hover={{ bg: useColorModeValue('gray.50', '#3a3f4c') }}>
                   <Td w="100px" fontWeight="semibold" fontSize="xs" py={3}>
                     {person.id}
@@ -270,6 +412,53 @@ const PersonalSubModulePage = () => {
           </Table>
         </Box>
       </Box>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Center mt={4}>
+          <HStack spacing={2}>
+            <IconButton
+              icon={<ChevronLeft size={16} />}
+              onClick={handlePrevPage}
+              isDisabled={currentPage === 1}
+              size="sm"
+              variant="outline"
+              colorScheme="blue"
+              aria-label="Página anterior"
+            />
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                size="sm"
+                variant={currentPage === page ? "solid" : "outline"}
+                colorScheme="blue"
+                minW="40px"
+              >
+                {page}
+              </Button>
+            ))}
+            
+            <IconButton
+              icon={<ChevronRight size={16} />}
+              onClick={handleNextPage}
+              isDisabled={currentPage === totalPages}
+              size="sm"
+              variant="outline"
+              colorScheme="blue"
+              aria-label="Página siguiente"
+            />
+          </HStack>
+        </Center>
+      )}
+
+      {/* Pagination Info */}
+      <Center mt={2}>
+        <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+          Mostrando {startIndex + 1}-{Math.min(endIndex, filteredPersonal.length)} de {filteredPersonal.length} elementos
+        </Text>
+      </Center>
     </Box>
   );
 };

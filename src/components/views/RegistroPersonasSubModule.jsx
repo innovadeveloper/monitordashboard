@@ -17,8 +17,9 @@ import {
   Badge,
   IconButton,
   HStack,
+  Center,
 } from '@chakra-ui/react';
-import { Search, Eye, Edit, UserPlus, Phone, Mail } from 'lucide-react';
+import { Search, Eye, Edit, UserPlus, Phone, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mock data for personas
 const mockPersonas = [
@@ -105,12 +106,104 @@ const mockPersonas = [
     estado: "Activo",
     fechaRegistro: "2023-06-12",
     contactoEmergencia: "José Ramírez - 999333222"
+  },
+  {
+    id: "PER-007",
+    nombre: "Diego",
+    apellidos: "Morales Herrera",
+    documento: "78901234",
+    tipoDocumento: "DNI",
+    telefono: "+51 999 789 012",
+    email: "diego.morales@email.com",
+    direccion: "Jr. Tacna 147, Breña",
+    fechaNacimiento: "1993-04-12",
+    estado: "Activo",
+    fechaRegistro: "2023-09-15",
+    contactoEmergencia: "Elena Morales - 999222111"
+  },
+  {
+    id: "PER-008",
+    nombre: "Carmen",
+    apellidos: "Vega Sánchez",
+    documento: "89012345",
+    tipoDocumento: "DNI",
+    telefono: "+51 999 890 123",
+    email: "carmen.vega@email.com",
+    direccion: "Av. La Marina 852, San Miguel",
+    fechaNacimiento: "1984-09-03",
+    estado: "Activo",
+    fechaRegistro: "2022-12-08",
+    contactoEmergencia: "Luis Vega - 999111000"
+  },
+  {
+    id: "PER-009",
+    nombre: "Fernando",
+    apellidos: "Castillo Ramos",
+    documento: "90123456",
+    tipoDocumento: "DNI",
+    telefono: "+51 999 901 234",
+    email: "fernando.castillo@email.com",
+    direccion: "Jr. Huancayo 369, La Victoria",
+    fechaNacimiento: "1991-12-28",
+    estado: "Inactivo",
+    fechaRegistro: "2023-05-22",
+    contactoEmergencia: "Pilar Castillo - 999000888"
+  },
+  {
+    id: "PER-010",
+    nombre: "Patricia",
+    apellidos: "Herrera Díaz",
+    documento: "01234567",
+    tipoDocumento: "DNI",
+    telefono: "+51 999 012 345",
+    email: "patricia.herrera@email.com",
+    direccion: "Av. Venezuela 741, Cercado de Lima",
+    fechaNacimiento: "1989-06-14",
+    estado: "Activo",
+    fechaRegistro: "2024-01-10",
+    contactoEmergencia: "Mario Herrera - 998888777"
+  },
+  {
+    id: "PER-011",
+    nombre: "Andrés",
+    apellidos: "Delgado Flores",
+    documento: "11234567",
+    tipoDocumento: "DNI",
+    telefono: "+51 999 112 345",
+    email: "andres.delgado@email.com",
+    direccion: "Jr. Amazonas 258, Rímac",
+    fechaNacimiento: "1986-10-07",
+    estado: "Activo",
+    fechaRegistro: "2023-08-18",
+    contactoEmergencia: "Rosa Delgado - 998777666"
+  },
+  {
+    id: "PER-012",
+    nombre: "Isabel",
+    apellidos: "Jiménez Vargas",
+    documento: "22345678",
+    tipoDocumento: "DNI",
+    telefono: "+51 999 223 456",
+    email: "isabel.jimenez@email.com",
+    direccion: "Av. Universitaria 963, Los Olivos",
+    fechaNacimiento: "1992-02-19",
+    estado: "Activo",
+    fechaRegistro: "2023-11-30",
+    contactoEmergencia: "Carlos Jiménez - 998666555"
   }
 ];
 
 const RegistroPersonasSubModule = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredPersonas, setFilteredPersonas] = useState(mockPersonas);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredPersonas.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredPersonas.slice(startIndex, endIndex);
 
   React.useEffect(() => {
     const filtered = mockPersonas.filter(persona =>
@@ -120,7 +213,20 @@ const RegistroPersonasSubModule = () => {
       persona.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredPersonas(filtered);
+    setCurrentPage(1); // Reset to first page when filtering
   }, [searchTerm]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
 
   const getEstadoColor = (estado) => {
     switch (estado) {
@@ -249,7 +355,7 @@ const RegistroPersonasSubModule = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {filteredPersonas.map((persona) => (
+              {currentItems.map((persona) => (
                 <Tr key={persona.id} _hover={{ bg: useColorModeValue('gray.50', '#3a3f4c') }}>
                   <Td w="100px" fontWeight="semibold" fontSize="xs" py={3}>
                     {persona.id}
@@ -320,6 +426,53 @@ const RegistroPersonasSubModule = () => {
           </Table>
         </Box>
       </Box>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Center mt={4}>
+          <HStack spacing={2}>
+            <IconButton
+              icon={<ChevronLeft size={16} />}
+              onClick={handlePrevPage}
+              isDisabled={currentPage === 1}
+              size="sm"
+              variant="outline"
+              colorScheme="blue"
+              aria-label="Página anterior"
+            />
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                size="sm"
+                variant={currentPage === page ? "solid" : "outline"}
+                colorScheme="blue"
+                minW="40px"
+              >
+                {page}
+              </Button>
+            ))}
+            
+            <IconButton
+              icon={<ChevronRight size={16} />}
+              onClick={handleNextPage}
+              isDisabled={currentPage === totalPages}
+              size="sm"
+              variant="outline"
+              colorScheme="blue"
+              aria-label="Página siguiente"
+            />
+          </HStack>
+        </Center>
+      )}
+
+      {/* Pagination Info */}
+      <Center mt={2}>
+        <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+          Mostrando {startIndex + 1}-{Math.min(endIndex, filteredPersonas.length)} de {filteredPersonas.length} elementos
+        </Text>
+      </Center>
     </Box>
   );
 };

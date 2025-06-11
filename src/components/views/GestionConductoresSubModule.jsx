@@ -23,8 +23,9 @@ import {
   Tab,
   TabPanel,
   Avatar,
+  Center,
 } from '@chakra-ui/react';
-import { Search, Eye, Edit, UserPlus, Clock, Award, BookOpen, Car } from 'lucide-react';
+import { Search, Eye, Edit, UserPlus, Clock, Award, BookOpen, Car, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mock data for conductores
 const mockConductores = [
@@ -176,6 +177,245 @@ const mockConductores = [
       horaFin: "21:30",
       diasTrabajo: ["Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
     }
+  },
+  {
+    id: "CON-006",
+    nombre: "Eduardo",
+    apellidos: "Ramirez Silva",
+    documento: "67890123",
+    telefono: "+51 999 678 901",
+    email: "eduardo.ramirez@email.com",
+    fechaIngreso: "2023-02-14",
+    estado: "Activo",
+    licencia: {
+      numero: "A10-67890123",
+      categoria: "A-IIa",
+      fechaVencimiento: "2025-12-15",
+      estado: "Vigente"
+    },
+    evaluaciones: [
+      { fecha: "2024-02-15", tipo: "Manejo Defensivo", puntaje: 89, estado: "Aprobado" },
+      { fecha: "2023-10-22", tipo: "Atención al Usuario", puntaje: 93, estado: "Aprobado" }
+    ],
+    capacitaciones: [
+      { fecha: "2024-01-18", curso: "Primeros Auxilios", duracion: "8 horas", estado: "Completado" },
+      { fecha: "2023-09-30", curso: "Inducción General", duracion: "16 horas", estado: "Completado" }
+    ],
+    horarios: {
+      turno: "Mañana",
+      horaInicio: "06:30",
+      horaFin: "14:30",
+      diasTrabajo: ["Lun", "Mar", "Mié", "Jue", "Vie"]
+    }
+  },
+  {
+    id: "CON-007",
+    nombre: "Laura",
+    apellidos: "Morales Peña",
+    documento: "78901234",
+    telefono: "+51 999 789 012",
+    email: "laura.morales@email.com",
+    fechaIngreso: "2023-06-18",
+    estado: "Activo",
+    licencia: {
+      numero: "A10-78901234",
+      categoria: "A-IIb",
+      fechaVencimiento: "2026-04-10",
+      estado: "Vigente"
+    },
+    evaluaciones: [
+      { fecha: "2024-03-12", tipo: "Conocimiento de Rutas", puntaje: 96, estado: "Excelente" },
+      { fecha: "2023-12-08", tipo: "Seguridad Vehicular", puntaje: 91, estado: "Aprobado" }
+    ],
+    capacitaciones: [
+      { fecha: "2024-02-28", curso: "Atención al Cliente", duracion: "4 horas", estado: "Completado" },
+      { fecha: "2023-08-14", curso: "Manejo Ecológico", duracion: "6 horas", estado: "Completado" }
+    ],
+    horarios: {
+      turno: "Tarde",
+      horaInicio: "14:30",
+      horaFin: "22:30",
+      diasTrabajo: ["Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+    }
+  },
+  {
+    id: "CON-008",
+    nombre: "Fernando",
+    apellidos: "Vargas López",
+    documento: "89012345",
+    telefono: "+51 999 890 123",
+    email: "fernando.vargas@email.com",
+    fechaIngreso: "2021-10-05",
+    estado: "Inactivo",
+    licencia: {
+      numero: "A10-89012345",
+      categoria: "A-IIb",
+      fechaVencimiento: "2024-06-30",
+      estado: "Por Vencer"
+    },
+    evaluaciones: [
+      { fecha: "2023-11-20", tipo: "Manejo Defensivo", puntaje: 78, estado: "Observado" },
+      { fecha: "2023-05-15", tipo: "Atención al Usuario", puntaje: 85, estado: "Aprobado" }
+    ],
+    capacitaciones: [
+      { fecha: "2023-06-12", curso: "Mecánica Básica", duracion: "12 horas", estado: "Completado" }
+    ],
+    horarios: {
+      turno: "Noche",
+      horaInicio: "22:30",
+      horaFin: "06:30",
+      diasTrabajo: ["Lun", "Mar", "Mié", "Jue", "Vie"]
+    }
+  },
+  {
+    id: "CON-009",
+    nombre: "Patricia",
+    apellidos: "Delgado Castro",
+    documento: "90123456",
+    telefono: "+51 999 901 234",
+    email: "patricia.delgado@email.com",
+    fechaIngreso: "2023-09-12",
+    estado: "Activo",
+    licencia: {
+      numero: "A10-90123456",
+      categoria: "A-IIa",
+      fechaVencimiento: "2026-08-25",
+      estado: "Vigente"
+    },
+    evaluaciones: [
+      { fecha: "2024-02-28", tipo: "Seguridad Vehicular", puntaje: 94, estado: "Aprobado" },
+      { fecha: "2023-12-20", tipo: "Conocimiento de Rutas", puntaje: 88, estado: "Aprobado" }
+    ],
+    capacitaciones: [
+      { fecha: "2024-01-22", curso: "Liderazgo y Comunicación", duracion: "8 horas", estado: "En Progreso" },
+      { fecha: "2023-10-18", curso: "Inducción General", duracion: "16 horas", estado: "Completado" }
+    ],
+    horarios: {
+      turno: "Mañana",
+      horaInicio: "05:45",
+      horaFin: "13:45",
+      diasTrabajo: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
+    }
+  },
+  {
+    id: "CON-010",
+    nombre: "Ricardo",
+    apellidos: "Huamán Torres",
+    documento: "01234567",
+    telefono: "+51 999 012 345",
+    email: "ricardo.huaman@email.com",
+    fechaIngreso: "2022-08-20",
+    estado: "Activo",
+    licencia: {
+      numero: "A10-01234567",
+      categoria: "A-IIb",
+      fechaVencimiento: "2025-11-18",
+      estado: "Vigente"
+    },
+    evaluaciones: [
+      { fecha: "2024-01-30", tipo: "Atención al Usuario", puntaje: 92, estado: "Aprobado" },
+      { fecha: "2023-09-25", tipo: "Manejo Defensivo", puntaje: 87, estado: "Aprobado" }
+    ],
+    capacitaciones: [
+      { fecha: "2024-02-14", curso: "Primeros Auxilios", duracion: "8 horas", estado: "Completado" },
+      { fecha: "2023-11-28", curso: "Manejo de Emergencias", duracion: "6 horas", estado: "Completado" }
+    ],
+    horarios: {
+      turno: "Tarde",
+      horaInicio: "13:00",
+      horaFin: "21:00",
+      diasTrabajo: ["Lun", "Mar", "Mié", "Jue", "Vie"]
+    }
+  },
+  {
+    id: "CON-011",
+    nombre: "Carmen",
+    apellidos: "Quispe Mamani",
+    documento: "11234567",
+    telefono: "+51 999 112 345",
+    email: "carmen.quispe@email.com",
+    fechaIngreso: "2023-04-22",
+    estado: "Activo",
+    licencia: {
+      numero: "A10-11234567",
+      categoria: "A-IIa",
+      fechaVencimiento: "2026-01-30",
+      estado: "Vigente"
+    },
+    evaluaciones: [
+      { fecha: "2024-03-18", tipo: "Conocimiento de Rutas", puntaje: 90, estado: "Aprobado" },
+      { fecha: "2023-11-12", tipo: "Seguridad Vehicular", puntaje: 95, estado: "Aprobado" }
+    ],
+    capacitaciones: [
+      { fecha: "2024-01-08", curso: "Atención al Cliente", duracion: "4 horas", estado: "Completado" },
+      { fecha: "2023-07-15", curso: "Mecánica Básica", duracion: "12 horas", estado: "Completado" }
+    ],
+    horarios: {
+      turno: "Mañana",
+      horaInicio: "06:15",
+      horaFin: "14:15",
+      diasTrabajo: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
+    }
+  },
+  {
+    id: "CON-012",
+    nombre: "Manuel",
+    apellidos: "Chávez Rojas",
+    documento: "22234567",
+    telefono: "+51 999 223 456",
+    email: "manuel.chavez@email.com",
+    fechaIngreso: "2021-12-08",
+    estado: "Activo",
+    licencia: {
+      numero: "A10-22234567",
+      categoria: "A-IIb",
+      fechaVencimiento: "2025-09-22",
+      estado: "Vigente"
+    },
+    evaluaciones: [
+      { fecha: "2024-02-05", tipo: "Manejo Defensivo", puntaje: 86, estado: "Aprobado" },
+      { fecha: "2023-08-30", tipo: "Atención al Usuario", puntaje: 89, estado: "Aprobado" }
+    ],
+    capacitaciones: [
+      { fecha: "2024-01-25", curso: "Manejo Ecológico", duracion: "6 horas", estado: "Completado" },
+      { fecha: "2023-10-10", curso: "Manejo de Emergencias", duracion: "6 horas", estado: "Completado" }
+    ],
+    horarios: {
+      turno: "Noche",
+      horaInicio: "22:00",
+      horaFin: "06:00",
+      diasTrabajo: ["Dom", "Lun", "Mar", "Mié", "Jue"]
+    }
+  },
+  {
+    id: "CON-013",
+    nombre: "Diana",
+    apellidos: "Romero Espinoza",
+    documento: "33234567",
+    telefono: "+51 999 332 345",
+    email: "diana.romero@email.com",
+    fechaIngreso: "2023-11-15",
+    estado: "Activo",
+    licencia: {
+      numero: "A10-33234567",
+      categoria: "A-IIa",
+      fechaVencimiento: "2026-07-12",
+      estado: "Vigente"
+    },
+    evaluaciones: [
+      { fecha: "2024-03-25", tipo: "Seguridad Vehicular", puntaje: 97, estado: "Excelente" },
+      { fecha: "2024-01-08", tipo: "Conocimiento de Rutas", puntaje: 92, estado: "Aprobado" }
+    ],
+    capacitaciones: [
+      { fecha: "2024-02-22", curso: "Liderazgo y Comunicación", duracion: "8 horas", estado: "En Progreso" },
+      { fecha: "2023-12-18", curso: "Inducción General", duracion: "16 horas", estado: "Completado" }
+    ],
+    horarios: {
+      turno: "Tarde",
+      horaInicio: "14:00",
+      horaFin: "22:00",
+      diasTrabajo: ["Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+    }
   }
 ];
 
@@ -183,6 +423,14 @@ const GestionConductoresSubModule = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredConductores, setFilteredConductores] = useState(mockConductores);
   const [selectedConductor, setSelectedConductor] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredConductores.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredConductores.slice(startIndex, endIndex);
 
   React.useEffect(() => {
     const filtered = mockConductores.filter(conductor =>
@@ -193,7 +441,25 @@ const GestionConductoresSubModule = () => {
       conductor.licencia.numero.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredConductores(filtered);
+    setCurrentPage(1); // Reset to first page when searching
   }, [searchTerm]);
+
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   const getEstadoColor = (estado) => {
     switch (estado) {
@@ -338,7 +604,7 @@ const GestionConductoresSubModule = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {filteredConductores.map((conductor) => (
+                {currentItems.map((conductor) => (
                   <Tr 
                     key={conductor.id} 
                     _hover={{ bg: useColorModeValue('gray.50', '#3a3f4c') }}
@@ -400,6 +666,62 @@ const GestionConductoresSubModule = () => {
               </Tbody>
             </Table>
           </Box>
+          
+          {/* Pagination Controls */}
+          {filteredConductores.length > itemsPerPage && (
+            <Box 
+              p={4} 
+              borderTop="1px solid" 
+              borderColor={useColorModeValue('gray.200', 'gray.600')}
+              bg={useColorModeValue('gray.50', '#35394a')}
+            >
+              <Flex justify="space-between" align="center">
+                {/* Pagination Info */}
+                <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+                  Mostrando {startIndex + 1}-{Math.min(endIndex, filteredConductores.length)} de {filteredConductores.length} conductores
+                </Text>
+                
+                {/* Pagination Buttons */}
+                <HStack spacing={2}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handlePrevPage}
+                    isDisabled={currentPage === 1}
+                    leftIcon={<ChevronLeft size={14} />}
+                  >
+                    Anterior
+                  </Button>
+                  
+                  {/* Page Numbers */}
+                  <HStack spacing={1}>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        size="sm"
+                        variant={currentPage === page ? "solid" : "outline"}
+                        colorScheme={currentPage === page ? "blue" : "gray"}
+                        onClick={() => handlePageChange(page)}
+                        minW="32px"
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                  </HStack>
+                  
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleNextPage}
+                    isDisabled={currentPage === totalPages}
+                    rightIcon={<ChevronRight size={14} />}
+                  >
+                    Siguiente
+                  </Button>
+                </HStack>
+              </Flex>
+            </Box>
+          )}
         </Box>
 
         {/* Conductor Details */}

@@ -20,8 +20,9 @@ import {
   Tag,
   Wrap,
   WrapItem,
+  Center,
 } from '@chakra-ui/react';
-import { Search, Eye, Edit, Plus, MapPin, Clock, Route } from 'lucide-react';
+import { Search, Eye, Edit, Plus, MapPin, Clock, Route, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mock data for routes
 const mockRoutes = [
@@ -157,12 +158,222 @@ const mockRoutes = [
     },
     tarifa: 8.00,
     fechaCreacion: "2023-05-15"
+  },
+  {
+    id: "RUT-006",
+    nombre: "Ruta 06 - Callao Express",
+    codigo: "R06",
+    origen: "Terminal Callao",
+    destino: "Plaza Dos de Mayo",
+    distancia: 19.5,
+    tiempoEstimado: 50,
+    estado: "Activa",
+    vehiculosAsignados: 4,
+    conductor: "Luis Paredes",
+    paradas: [
+      "Terminal Callao",
+      "Av. Argentina",
+      "Cercado de Lima",
+      "Plaza Dos de Mayo"
+    ],
+    horarios: {
+      inicio: "05:15",
+      fin: "22:45",
+      frecuencia: "16 min"
+    },
+    tarifa: 3.20,
+    fechaCreacion: "2023-06-25"
+  },
+  {
+    id: "RUT-007",
+    nombre: "Ruta 07 - Costa Verde",
+    codigo: "R07",
+    origen: "Chorrillos",
+    destino: "Miraflores",
+    distancia: 11.8,
+    tiempoEstimado: 30,
+    estado: "Activa",
+    vehiculosAsignados: 2,
+    conductor: "Elena Mart\u00ednez",
+    paradas: [
+      "Chorrillos Playa",
+      "Barranco",
+      "Miraflores Malecon",
+      "Miraflores Centro"
+    ],
+    horarios: {
+      inicio: "06:00",
+      fin: "22:00",
+      frecuencia: "20 min"
+    },
+    tarifa: 2.80,
+    fechaCreacion: "2023-07-12"
+  },
+  {
+    id: "RUT-008",
+    nombre: "Ruta 08 - Universitaria",
+    codigo: "R08",
+    origen: "Universidad San Marcos",
+    destino: "Universidad Cat\u00f3lica",
+    distancia: 14.3,
+    tiempoEstimado: 42,
+    estado: "En Mantenimiento",
+    vehiculosAsignados: 3,
+    conductor: "Sin Asignar",
+    paradas: [
+      "Ciudad Universitaria UNMSM",
+      "Av. Venezuela",
+      "San Isidro",
+      "PUCP Campus"
+    ],
+    horarios: {
+      inicio: "06:30",
+      fin: "21:30",
+      frecuencia: "25 min"
+    },
+    tarifa: 2.20,
+    fechaCreacion: "2023-08-18"
+  },
+  {
+    id: "RUT-009",
+    nombre: "Ruta 09 - Zona Industrial",
+    codigo: "R09",
+    origen: "Parque Industrial",
+    destino: "Terminal Pesquero",
+    distancia: 26.7,
+    tiempoEstimado: 68,
+    estado: "Activa",
+    vehiculosAsignados: 5,
+    conductor: "Mario Quispe",
+    paradas: [
+      "Parque Industrial Ate",
+      "La Victoria",
+      "El Porvenir",
+      "Ventanilla",
+      "Terminal Pesquero"
+    ],
+    horarios: {
+      inicio: "04:45",
+      fin: "23:15",
+      frecuencia: "22 min"
+    },
+    tarifa: 4.20,
+    fechaCreacion: "2023-09-05"
+  },
+  {
+    id: "RUT-010",
+    nombre: "Ruta 10 - Metropolitana Este",
+    codigo: "R10",
+    origen: "San Juan de Lurigancho",
+    destino: "Miraflores",
+    distancia: 31.2,
+    tiempoEstimado: 78,
+    estado: "Suspendida",
+    vehiculosAsignados: 6,
+    conductor: "Sin Asignar",
+    paradas: [
+      "SJL Centro",
+      "El Agustino",
+      "Centro de Lima",
+      "San Isidro",
+      "Miraflores"
+    ],
+    horarios: {
+      inicio: "05:00",
+      fin: "23:00",
+      frecuencia: "18 min"
+    },
+    tarifa: 4.80,
+    fechaCreacion: "2023-10-10"
+  },
+  {
+    id: "RUT-011",
+    nombre: "Ruta 11 - Circuito Comercial",
+    codigo: "R11",
+    origen: "Gamarra",
+    destino: "Mesa Redonda",
+    distancia: 8.9,
+    tiempoEstimado: 28,
+    estado: "Activa",
+    vehiculosAsignados: 2,
+    conductor: "Rosa Fernandez",
+    paradas: [
+      "Gamarra Centro",
+      "Av. Aviaci\u00f3n",
+      "Centro de Lima",
+      "Mesa Redonda"
+    ],
+    horarios: {
+      inicio: "07:00",
+      fin: "20:00",
+      frecuencia: "12 min"
+    },
+    tarifa: 1.80,
+    fechaCreacion: "2023-11-20"
+  },
+  {
+    id: "RUT-012",
+    nombre: "Ruta 12 - Norte Integrado",
+    codigo: "R12",
+    origen: "Comas",
+    destino: "Independencia",
+    distancia: 17.4,
+    tiempoEstimado: 45,
+    estado: "Activa",
+    vehiculosAsignados: 4,
+    conductor: "Pedro Castro",
+    paradas: [
+      "Comas Centro",
+      "Los Olivos",
+      "San Mart\u00edn de Porres",
+      "Independencia Plaza"
+    ],
+    horarios: {
+      inicio: "05:30",
+      fin: "22:30",
+      frecuencia: "15 min"
+    },
+    tarifa: 2.60,
+    fechaCreacion: "2023-12-08"
+  },
+  {
+    id: "RUT-013",
+    nombre: "Ruta 13 - Tur\u00edstica Centro",
+    codigo: "RT1",
+    origen: "Palacio de Gobierno",
+    destino: "Museo Nacional",
+    distancia: 13.6,
+    tiempoEstimado: 50,
+    estado: "En Planificaci\u00f3n",
+    vehiculosAsignados: 2,
+    conductor: "Sin Asignar",
+    paradas: [
+      "Palacio de Gobierno",
+      "Catedral de Lima",
+      "Casa de Pizarro",
+      "Museo de la Naci\u00f3n"
+    ],
+    horarios: {
+      inicio: "08:00",
+      fin: "18:00",
+      frecuencia: "45 min"
+    },
+    tarifa: 6.50,
+    fechaCreacion: "2024-01-15"
   }
 ];
 
 const RouteRegistrySubModule = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRoutes, setFilteredRoutes] = useState(mockRoutes);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredRoutes.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredRoutes.slice(startIndex, endIndex);
 
   React.useEffect(() => {
     const filtered = mockRoutes.filter(route =>
@@ -173,7 +384,25 @@ const RouteRegistrySubModule = () => {
       route.conductor.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredRoutes(filtered);
+    setCurrentPage(1); // Reset to first page when searching
   }, [searchTerm]);
+
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   const getEstadoColor = (estado) => {
     switch (estado) {
@@ -300,7 +529,7 @@ const RouteRegistrySubModule = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {filteredRoutes.map((route) => (
+              {currentItems.map((route) => (
                 <Tr key={route.id} _hover={{ bg: useColorModeValue('gray.50', '#3a3f4c') }}>
                   <Td w="100px" py={3}>
                     <HStack spacing={2}>
@@ -400,6 +629,53 @@ const RouteRegistrySubModule = () => {
           </Table>
         </Box>
       </Box>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Center mt={4}>
+          <HStack spacing={2}>
+            <IconButton
+              icon={<ChevronLeft size={16} />}
+              onClick={handlePrevPage}
+              isDisabled={currentPage === 1}
+              size="sm"
+              variant="outline"
+              colorScheme="blue"
+              aria-label="Página anterior"
+            />
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                size="sm"
+                variant={currentPage === page ? "solid" : "outline"}
+                colorScheme="blue"
+                minW="40px"
+              >
+                {page}
+              </Button>
+            ))}
+            
+            <IconButton
+              icon={<ChevronRight size={16} />}
+              onClick={handleNextPage}
+              isDisabled={currentPage === totalPages}
+              size="sm"
+              variant="outline"
+              colorScheme="blue"
+              aria-label="Página siguiente"
+            />
+          </HStack>
+        </Center>
+      )}
+
+      {/* Pagination Info */}
+      <Center mt={2}>
+        <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+          Mostrando {startIndex + 1}-{Math.min(endIndex, filteredRoutes.length)} de {filteredRoutes.length} elementos
+        </Text>
+      </Center>
     </Box>
   );
 };

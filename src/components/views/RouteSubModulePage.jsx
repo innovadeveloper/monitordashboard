@@ -17,8 +17,9 @@ import {
   Badge,
   IconButton,
   HStack,
+  Center,
 } from '@chakra-ui/react';
-import { Search, Eye, Edit, Plus, MapPin } from 'lucide-react';
+import { Search, Eye, Edit, Plus, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mock data for routes
 const mockRoutes = [
@@ -101,12 +102,148 @@ const mockRoutes = [
     vehiculosAsignados: 3,
     horaInicio: "06:30",
     horaFin: "21:00"
+  },
+  {
+    id: "R006",
+    nombre: "Ruta 6 - Costa Verde",
+    codigo: "RUT-006",
+    origen: "Chorrillos",
+    destino: "Barranco",
+    distancia: "8.5 km",
+    tiempoEstimado: "25 min",
+    paradas: 8,
+    estado: "Activa",
+    frecuencia: "12 min",
+    tarifa: "S/ 2.80",
+    vehiculosAsignados: 2,
+    horaInicio: "06:00",
+    horaFin: "23:00"
+  },
+  {
+    id: "R007",
+    nombre: "Ruta 7 - Industrial",
+    codigo: "RUT-007",
+    origen: "Ate Vitarte",
+    destino: "Callao",
+    distancia: "28.3 km",
+    tiempoEstimado: "70 min",
+    paradas: 22,
+    estado: "Activa",
+    frecuencia: "22 min",
+    tarifa: "S/ 4.00",
+    vehiculosAsignados: 5,
+    horaInicio: "05:00",
+    horaFin: "22:30"
+  },
+  {
+    id: "R008",
+    nombre: "Ruta 8 - Metropolitana Sur",
+    codigo: "RUT-008",
+    origen: "San Juan de Miraflores",
+    destino: "Centro de Lima",
+    distancia: "24.7 km",
+    tiempoEstimado: "55 min",
+    paradas: 18,
+    estado: "Suspendida",
+    frecuencia: "16 min",
+    tarifa: "S/ 3.20",
+    vehiculosAsignados: 4,
+    horaInicio: "05:30",
+    horaFin: "23:30"
+  },
+  {
+    id: "R009",
+    nombre: "Ruta 9 - Interconexi\u00f3n Norte",
+    codigo: "RUT-009",
+    origen: "Los Olivos",
+    destino: "San Juan de Lurigancho",
+    distancia: "32.1 km",
+    tiempoEstimado: "85 min",
+    paradas: 26,
+    estado: "En Planificaci\u00f3n",
+    frecuencia: "28 min",
+    tarifa: "S/ 4.50",
+    vehiculosAsignados: 6,
+    horaInicio: "04:45",
+    horaFin: "23:45"
+  },
+  {
+    id: "R010",
+    nombre: "Ruta 10 - Expreso Callao",
+    codigo: "RUT-010",
+    origen: "La Punta",
+    destino: "Centro de Lima",
+    distancia: "16.9 km",
+    tiempoEstimado: "38 min",
+    paradas: 11,
+    estado: "Activa",
+    frecuencia: "14 min",
+    tarifa: "S/ 3.50",
+    vehiculosAsignados: 3,
+    horaInicio: "05:15",
+    horaFin: "22:45"
+  },
+  {
+    id: "R011",
+    nombre: "Ruta 11 - Circuito Este",
+    codigo: "RUT-011",
+    origen: "Santa Anita",
+    destino: "El Agustino",
+    distancia: "19.4 km",
+    tiempoEstimado: "48 min",
+    paradas: 15,
+    estado: "Mantenimiento",
+    frecuencia: "20 min",
+    tarifa: "S/ 2.90",
+    vehiculosAsignados: 3,
+    horaInicio: "06:00",
+    horaFin: "22:00"
+  },
+  {
+    id: "R012",
+    nombre: "Ruta 12 - Lima Norte Express",
+    codigo: "RUT-012",
+    origen: "Comas",
+    destino: "Plaza San Mart\u00edn",
+    distancia: "26.8 km",
+    tiempoEstimado: "62 min",
+    paradas: 20,
+    estado: "Activa",
+    frecuencia: "18 min",
+    tarifa: "S/ 3.80",
+    vehiculosAsignados: 4,
+    horaInicio: "04:30",
+    horaFin: "24:00"
+  },
+  {
+    id: "R013",
+    nombre: "Ruta 13 - Turismo Centro",
+    codigo: "RUT-013",
+    origen: "Museo Nacional",
+    destino: "Palacio de Gobierno",
+    distancia: "12.3 km",
+    tiempoEstimado: "35 min",
+    paradas: 9,
+    estado: "Activa",
+    frecuencia: "25 min",
+    tarifa: "S/ 5.00",
+    vehiculosAsignados: 2,
+    horaInicio: "08:00",
+    horaFin: "20:00"
   }
 ];
 
 const RouteSubModulePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRoutes, setFilteredRoutes] = useState(mockRoutes);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredRoutes.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredRoutes.slice(startIndex, endIndex);
 
   React.useEffect(() => {
     const filtered = mockRoutes.filter(route =>
@@ -116,7 +253,25 @@ const RouteSubModulePage = () => {
       route.destino.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredRoutes(filtered);
+    setCurrentPage(1); // Reset to first page when searching
   }, [searchTerm]);
+
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   const getEstadoColor = (estado) => {
     switch (estado) {
@@ -242,7 +397,7 @@ const RouteSubModulePage = () => {
         >
           <Table variant="simple" size="sm" style={{ tableLayout: 'fixed' }}>
             <Tbody>
-              {filteredRoutes.map((route) => (
+              {currentItems.map((route) => (
                 <Tr key={route.id} _hover={{ bg: useColorModeValue('gray.50', '#3a3f4c') }}>
                   <Td w="100px" fontWeight="semibold" fontSize="xs" py={3}>
                     {route.codigo}
@@ -311,6 +466,62 @@ const RouteSubModulePage = () => {
             </Tbody>
           </Table>
         </Box>
+        
+        {/* Pagination Controls */}
+        {filteredRoutes.length > itemsPerPage && (
+          <Box 
+            p={4} 
+            borderTop="1px solid" 
+            borderColor={useColorModeValue('gray.200', 'gray.600')}
+            bg={useColorModeValue('gray.50', '#35394a')}
+          >
+            <Flex justify="space-between" align="center">
+              {/* Pagination Info */}
+              <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredRoutes.length)} de {filteredRoutes.length} rutas
+              </Text>
+              
+              {/* Pagination Buttons */}
+              <HStack spacing={2}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handlePrevPage}
+                  isDisabled={currentPage === 1}
+                  leftIcon={<ChevronLeft size={14} />}
+                >
+                  Anterior
+                </Button>
+                
+                {/* Page Numbers */}
+                <HStack spacing={1}>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      size="sm"
+                      variant={currentPage === page ? "solid" : "outline"}
+                      colorScheme={currentPage === page ? "blue" : "gray"}
+                      onClick={() => handlePageChange(page)}
+                      minW="32px"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </HStack>
+                
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleNextPage}
+                  isDisabled={currentPage === totalPages}
+                  rightIcon={<ChevronRight size={14} />}
+                >
+                  Siguiente
+                </Button>
+              </HStack>
+            </Flex>
+          </Box>
+        )}
       </Box>
     </Box>
   );

@@ -18,8 +18,9 @@ import {
   Badge,
   IconButton,
   Avatar,
+  Center,
 } from '@chakra-ui/react';
-import { Search, Eye, Edit, Plus, Truck, Calendar, Settings } from 'lucide-react';
+import { Search, Eye, Edit, Plus, Truck, Calendar, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mock data for vehicles
 const mockVehicles = [
@@ -136,12 +137,191 @@ const mockVehicles = [
     },
     conductor: "José Gutierrez",
     ruta: "Ruta 04 - Este"
+  },
+  {
+    id: "VEH-007",
+    placa: "STU-901",
+    modelo: "Mercedes-Benz Citaro",
+    año: 2023,
+    capacidad: 42,
+    kilometraje: 8500,
+    estado: "Activo",
+    fechaAdquisicion: "2023-02-20",
+    ultimoMantenimiento: "2024-03-15",
+    proximoMantenimiento: "2024-06-15",
+    seguro: {
+      empresa: "La Positiva Seguros",
+      poliza: "POL-345679",
+      vencimiento: "2025-02-28"
+    },
+    conductor: "Carmen Quispe",
+    ruta: "Ruta 07 - Costa Verde"
+  },
+  {
+    id: "VEH-008",
+    placa: "VWX-234",
+    modelo: "Scania K270",
+    año: 2021,
+    capacidad: 38,
+    kilometraje: 72000,
+    estado: "Activo",
+    fechaAdquisicion: "2021-11-08",
+    ultimoMantenimiento: "2024-02-10",
+    proximoMantenimiento: "2024-05-10",
+    seguro: {
+      empresa: "Mapfre Seguros",
+      poliza: "POL-456789",
+      vencimiento: "2024-11-30"
+    },
+    conductor: "Eduardo Ramirez",
+    ruta: "Ruta 08 - Universitaria"
+  },
+  {
+    id: "VEH-009",
+    placa: "YZA-567",
+    modelo: "Volvo B8R",
+    año: 2022,
+    capacidad: 46,
+    kilometraje: 41000,
+    estado: "Mantenimiento",
+    fechaAdquisicion: "2022-04-15",
+    ultimoMantenimiento: "2024-03-20",
+    proximoMantenimiento: "2024-06-20",
+    seguro: {
+      empresa: "Rimac Seguros",
+      poliza: "POL-567890",
+      vencimiento: "2024-12-15"
+    },
+    conductor: "Sin Asignar",
+    ruta: "Sin Asignar"
+  },
+  {
+    id: "VEH-010",
+    placa: "BCD-890",
+    modelo: "Mercedes-Benz O500",
+    año: 2020,
+    capacidad: 48,
+    kilometraje: 98000,
+    estado: "Activo",
+    fechaAdquisicion: "2020-07-22",
+    ultimoMantenimiento: "2024-01-30",
+    proximoMantenimiento: "2024-04-30",
+    seguro: {
+      empresa: "Pacifico Seguros",
+      poliza: "POL-678901",
+      vencimiento: "2024-10-20"
+    },
+    conductor: "Laura Morales",
+    ruta: "Ruta 09 - Zona Industrial"
+  },
+  {
+    id: "VEH-011",
+    placa: "EFG-123",
+    modelo: "Iveco Crossway",
+    año: 2023,
+    capacidad: 32,
+    kilometraje: 15000,
+    estado: "Activo",
+    fechaAdquisicion: "2023-08-10",
+    ultimoMantenimiento: "2024-02-25",
+    proximoMantenimiento: "2024-05-25",
+    seguro: {
+      empresa: "La Positiva Seguros",
+      poliza: "POL-789012",
+      vencimiento: "2025-01-10"
+    },
+    conductor: "Patricia Delgado",
+    ruta: "Ruta 10 - Metropolitana Este"
+  },
+  {
+    id: "VEH-012",
+    placa: "HIJ-456",
+    modelo: "Scania K310",
+    año: 2019,
+    capacidad: 44,
+    kilometraje: 105000,
+    estado: "Inactivo",
+    fechaAdquisicion: "2019-05-18",
+    ultimoMantenimiento: "2023-11-20",
+    proximoMantenimiento: "2024-02-20",
+    seguro: {
+      empresa: "Mapfre Seguros",
+      poliza: "POL-890123",
+      vencimiento: "2024-08-25"
+    },
+    conductor: "Sin Asignar",
+    ruta: "Sin Asignar"
+  },
+  {
+    id: "VEH-013",
+    placa: "KLM-789",
+    modelo: "Volvo B9L",
+    año: 2022,
+    capacidad: 39,
+    kilometraje: 33000,
+    estado: "Activo",
+    fechaAdquisicion: "2022-12-05",
+    ultimoMantenimiento: "2024-03-10",
+    proximoMantenimiento: "2024-06-10",
+    seguro: {
+      empresa: "Rimac Seguros",
+      poliza: "POL-901234",
+      vencimiento: "2024-12-31"
+    },
+    conductor: "Ricardo Huamán",
+    ruta: "Ruta 11 - Circuito Comercial"
+  },
+  {
+    id: "VEH-014",
+    placa: "NOP-012",
+    modelo: "Mercedes-Benz Sprinter City",
+    año: 2021,
+    capacidad: 22,
+    kilometraje: 58000,
+    estado: "Activo",
+    fechaAdquisicion: "2021-09-28",
+    ultimoMantenimiento: "2024-01-18",
+    proximoMantenimiento: "2024-04-18",
+    seguro: {
+      empresa: "Pacifico Seguros",
+      poliza: "POL-012345",
+      vencimiento: "2024-09-15"
+    },
+    conductor: "Manuel Chávez",
+    ruta: "Ruta 12 - Norte Integrado"
+  },
+  {
+    id: "VEH-015",
+    placa: "QRS-345",
+    modelo: "Iveco Daily Tourys",
+    año: 2023,
+    capacidad: 28,
+    kilometraje: 5200,
+    estado: "Activo",
+    fechaAdquisicion: "2023-10-12",
+    ultimoMantenimiento: "2024-03-05",
+    proximoMantenimiento: "2024-06-05",
+    seguro: {
+      empresa: "La Positiva Seguros",
+      poliza: "POL-123456",
+      vencimiento: "2025-03-20"
+    },
+    conductor: "Diana Romero",
+    ruta: "Ruta 13 - Turística Centro"
   }
 ];
 
 const VehicleRegistrySubModule = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredVehicles, setFilteredVehicles] = useState(mockVehicles);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredVehicles.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredVehicles.slice(startIndex, endIndex);
 
   React.useEffect(() => {
     const filtered = mockVehicles.filter(vehicle =>
@@ -151,7 +331,25 @@ const VehicleRegistrySubModule = () => {
       vehicle.ruta.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredVehicles(filtered);
+    setCurrentPage(1); // Reset to first page when searching
   }, [searchTerm]);
+
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   const getEstadoColor = (estado) => {
     switch (estado) {
@@ -281,7 +479,7 @@ const VehicleRegistrySubModule = () => {
         >
           <Table variant="simple" size="sm" style={{ tableLayout: 'fixed' }}>
             <Tbody>
-              {filteredVehicles.map((vehicle) => (
+              {currentItems.map((vehicle) => (
                 <Tr key={vehicle.id} _hover={{ bg: useColorModeValue('gray.50', '#3a3f4c') }}>
                   <Td w="80px" fontWeight="semibold" fontSize="xs" py={3}>
                     {vehicle.id}
@@ -371,6 +569,53 @@ const VehicleRegistrySubModule = () => {
           </Table>
         </Box>
       </Box>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Center mt={4}>
+          <HStack spacing={2}>
+            <IconButton
+              icon={<ChevronLeft size={16} />}
+              onClick={handlePrevPage}
+              isDisabled={currentPage === 1}
+              size="sm"
+              variant="outline"
+              colorScheme="blue"
+              aria-label="Página anterior"
+            />
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                size="sm"
+                variant={currentPage === page ? "solid" : "outline"}
+                colorScheme="blue"
+                minW="40px"
+              >
+                {page}
+              </Button>
+            ))}
+            
+            <IconButton
+              icon={<ChevronRight size={16} />}
+              onClick={handleNextPage}
+              isDisabled={currentPage === totalPages}
+              size="sm"
+              variant="outline"
+              colorScheme="blue"
+              aria-label="Página siguiente"
+            />
+          </HStack>
+        </Center>
+      )}
+
+      {/* Pagination Info */}
+      <Center mt={2}>
+        <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+          Mostrando {startIndex + 1}-{Math.min(endIndex, filteredVehicles.length)} de {filteredVehicles.length} elementos
+        </Text>
+      </Center>
     </Box>
   );
 };
