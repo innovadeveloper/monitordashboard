@@ -28,8 +28,10 @@ import {
   Badge,
   IconButton,
   useColorMode,
+  Checkbox,
+  Select,
 } from '@chakra-ui/react';
-import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin, Route, Navigation, ChevronLeft, ChevronRight, Phone, MessageCircle, ImageIcon, Send, ArrowLeft, ArrowRight, Sun, Moon, Grid3X3, Video, Settings, Monitor, Home } from 'lucide-react';
+import { Bell, User, X, Play, Camera, ZoomIn, Square, ChevronDown, Pause, MapPin, Route, Navigation, ChevronLeft, ChevronRight, Phone, MessageCircle, ImageIcon, Send, ArrowLeft, ArrowRight, Sun, Moon, Grid3X3, Video, Settings, Monitor, Home, Search, CheckSquare, Square as SquareIcon } from 'lucide-react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -40,10 +42,88 @@ import theme from '../../theme';
 import {
   ContextMenu,
   MaterialRouteSelector,
-  BusItem,
   LeafletMap,
   MonitoringModulesMenu
 } from '../ui';
+
+// Custom TrackBusItem component with checkbox for TrackPlayerPage
+const TrackBusItem = ({ bus, isSelected, isChecked, onClick, onCheck, onDragStart }) => {
+  const handleItemClick = (e) => {
+    // Prevent checkbox click from triggering item selection
+    if (e.target.type !== 'checkbox') {
+      onClick();
+    }
+  };
+
+  const handleDoubleClick = (e) => {
+    e.preventDefault();
+    // Double click toggles the checkbox
+    onCheck(!isChecked);
+  };
+
+  const getStatusColor = (estado) => {
+    switch (estado) {
+      case 'active': return 'green';
+      case 'warning': return 'orange';
+      case 'error': return 'red';
+      default: return 'gray';
+    }
+  };
+
+  return (
+    <Box
+      p={3}
+      mb={2}
+      bg={isSelected ? useColorModeValue('blue.50', 'blue.900') : useColorModeValue('white', '#35394a')}
+      borderRadius="lg"
+      border="2px solid"
+      borderColor={isSelected ? useColorModeValue('blue.300', 'blue.600') : useColorModeValue('gray.200', 'transparent')}
+      cursor="pointer"
+      onClick={handleItemClick}
+      onDoubleClick={handleDoubleClick}
+      _hover={{
+        bg: useColorModeValue('blue.50', 'blue.900'),
+        borderColor: useColorModeValue('blue.300', 'blue.600'),
+        transform: 'translateY(-1px)',
+        boxShadow: 'md'
+      }}
+      transition="all 0.2s"
+      draggable
+      onDragStart={onDragStart}
+    >
+      <Flex align="center" justify="space-between" mb={2}>
+        <HStack spacing={3}>
+          <Checkbox
+            isChecked={isChecked}
+            onChange={(e) => onCheck(e.target.checked)}
+            colorScheme="blue"
+            size="md"
+          />
+          <Text fontSize="sm" fontWeight="bold" color={useColorModeValue('gray.800', '#e2e8f0')}>
+            {bus.id}
+          </Text>
+        </HStack>
+        <Badge colorScheme={getStatusColor(bus.estado)} size="sm">
+          {bus.estado === 'active' ? 'Activo' : bus.estado === 'warning' ? 'Alerta' : 'Error'}
+        </Badge>
+      </Flex>
+      <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} mb={1}>
+        {bus.conductor}
+      </Text>
+      <Text fontSize="xs" color={useColorModeValue('gray.500', 'gray.500')}>
+        {bus.ruta}
+      </Text>
+      <HStack spacing={2} mt={2}>
+        <Text fontSize="10px" color={useColorModeValue('gray.500', 'gray.500')}>
+          ⏱ {bus.tiempo}
+        </Text>
+        <Text fontSize="10px" color={useColorModeValue('gray.500', 'gray.500')}>
+          📍 {bus.velocidad}
+        </Text>
+      </HStack>
+    </Box>
+  );
+};
 
 // Modals
 import {
@@ -145,6 +225,24 @@ const TrackPlayerPage = () => {
   const [routeFilter, setRouteFilter] = useState('all');
   const [draggedBus, setDraggedBus] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [fechaInicioDate, setFechaInicioDate] = useState(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+  const [fechaInicioHour, setFechaInicioHour] = useState('00');
+  const [fechaFinDate, setFechaFinDate] = useState(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+  const [fechaFinHour, setFechaFinHour] = useState('23');
+  const [checkedBuses, setCheckedBuses] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     contextMenu,
@@ -223,6 +321,69 @@ const TrackPlayerPage = () => {
   const handleBusClick = (busId) => {
     // Always select the clicked bus (replace previous selection)
     setSelectedBus(busId);
+  };
+
+  const handleBusCheck = (busId, isChecked) => {
+    const newCheckedBuses = new Set(checkedBuses);
+    if (isChecked) {
+      newCheckedBuses.add(busId);
+    } else {
+      newCheckedBuses.delete(busId);
+    }
+    setCheckedBuses(newCheckedBuses);
+  };
+
+  // const handleSelectAll = () => {
+  //   const allBusIds = new Set(filteredBuses.map(bus => bus.id));
+  //   setCheckedBuses(allBusIds);
+  //   toast({
+  //     title: 'Todas las unidades seleccionadas',
+  //     description: `${filteredBuses.length} unidades seleccionadas`,
+  //     status: 'success',
+  //     duration: 2000,
+  //     isClosable: true,
+  //   });
+  // };
+
+  const handleDeselectAll = () => {
+    setCheckedBuses(new Set());
+    toast({
+      title: 'Selección limpiada',
+      description: 'Ninguna unidad seleccionada',
+      status: 'info',
+      duration: 2000,
+      isClosable: true,
+    });
+  };
+
+  const handleConsultarRutas = async () => {
+    if (!fechaInicioDate || !fechaFinDate || checkedBuses.size === 0) {
+      toast({
+        title: 'Datos incompletos',
+        description: 'Por favor selecciona fechas y al menos una unidad',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    const formatFechaInicio = `${fechaInicioDate.split('-').reverse().join('/')} ${fechaInicioHour}:00`;
+    const formatFechaFin = `${fechaFinDate.split('-').reverse().join('/')} ${fechaFinHour}:00`;
+    
+    // Simular consulta de rutas
+    setTimeout(() => {
+      setIsLoading(false);
+      toast({
+        title: 'Consulta completada',
+        description: `Rutas consultadas para ${checkedBuses.size} unidades del ${formatFechaInicio} al ${formatFechaFin}`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    }, 2000);
   };
 
   const toggleSidebar = () => {
@@ -323,7 +484,7 @@ const TrackPlayerPage = () => {
                 Inicio
               </Button>
               <Text fontSize="xl" fontWeight="bold">
-                🎬 Reproductor de Rutas
+                🎬 Reproductor de Tracks
               </Text>
             </HStack>
 
@@ -383,7 +544,7 @@ const TrackPlayerPage = () => {
                 <>
                   <Flex justify="space-between" align="center" mb={4}>
                     <Text fontSize="lg" fontWeight="600" color={useColorModeValue('gray.800', 'app.text.primary')}>
-                      Unidades Activas
+                      Seleccionar Unidades
                     </Text>
                     <IconButton
                       icon={<ChevronLeft size={16} />}
@@ -424,7 +585,184 @@ const TrackPlayerPage = () => {
                       value={routeFilter}
                       onChange={setRouteFilter}
                     />
+                    
+                    {/* Date Range Controls */}
+                    <Box w="100%">
+                      <Text fontSize="xs" fontWeight="semibold" color={useColorModeValue('gray.700', 'gray.300')} mb={2}>
+                        Rango de Fechas
+                      </Text>
+                      <VStack spacing={3}>
+                        <Box w="100%">
+                          <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} mb={1}>
+                            Fecha Inicio
+                          </Text>
+                          <HStack spacing={2}>
+                            <Input
+                              type="date"
+                              value={fechaInicioDate}
+                              onChange={(e) => setFechaInicioDate(e.target.value)}
+                              size="sm"
+                              w="140px"
+                              variant="outline"
+                              borderColor={useColorModeValue('gray.100', 'transparent')}
+                              bg="transparent"
+                              color={useColorModeValue('gray.800', '#e2e8f0')}
+                              _hover={{ 
+                                borderColor: useColorModeValue('gray.300', 'gray.600')
+                              }}
+                              _focus={{ 
+                                borderColor: useColorModeValue('blue.500', 'blue.300'),
+                                boxShadow: 'none'
+                              }}
+                            />
+                            <Select
+                              value={fechaInicioHour}
+                              onChange={(e) => setFechaInicioHour(e.target.value)}
+                              size="sm"
+                              w="90px"
+                              border="1px solid"
+                              borderColor={useColorModeValue('gray.100', 'transparent')}
+                              bg={useColorModeValue('white', '#2a2f3a')}
+                              color={useColorModeValue('gray.800', '#e2e8f0')}
+                              iconSize="14px"
+                              _hover={{ 
+                                borderColor: useColorModeValue('blue.300', 'primary.600'),
+                                bg: useColorModeValue('gray.50', '#2f3441')
+                              }}
+                              _focus={{ 
+                                borderColor: useColorModeValue('blue.500', 'primary.500'),
+                                boxShadow: useColorModeValue('0 0 0 1px rgba(66, 153, 225, 0.6)', 'none'),
+                                bg: useColorModeValue('white', '#2f3441')
+                              }}
+                              sx={{
+                                '& > option': {
+                                  paddingRight: '8px',
+                                  backgroundColor: useColorModeValue('#ffffff', '#2a2f3a'),
+                                  color: useColorModeValue('gray.800', '#e2e8f0')
+                                }
+                              }}
+                            >
+                              {Array.from({length: 24}, (_, i) => (
+                                <option key={i} value={String(i).padStart(2, '0')}>
+                                  {String(i).padStart(2, '0')}:00
+                                </option>
+                              ))}
+                            </Select>
+                          </HStack>
+                        </Box>
+                        <Box w="100%">
+                          <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} mb={1}>
+                            Fecha Fin
+                          </Text>
+                          <HStack spacing={2}>
+                            <Input
+                              type="date"
+                              value={fechaFinDate}
+                              onChange={(e) => setFechaFinDate(e.target.value)}
+                              size="sm"
+                              w="140px"
+                              variant="outline"
+                              borderColor={useColorModeValue('gray.100', 'transparent')}
+                              bg="transparent"
+                              color={useColorModeValue('gray.800', '#e2e8f0')}
+                              _hover={{ 
+                                borderColor: useColorModeValue('gray.300', 'gray.600')
+                              }}
+                              _focus={{ 
+                                borderColor: useColorModeValue('blue.500', 'blue.300'),
+                                boxShadow: 'none'
+                              }}
+                            />
+                            <Select
+                              value={fechaFinHour}
+                              onChange={(e) => setFechaFinHour(e.target.value)}
+                              size="sm"
+                              w="90px"
+                              border="1px solid"
+                              borderColor={useColorModeValue('gray.100', 'transparent')}
+                              bg={useColorModeValue('white', '#2a2f3a')}
+                              color={useColorModeValue('gray.800', '#e2e8f0')}
+                              iconSize="14px"
+                              _hover={{ 
+                                borderColor: useColorModeValue('blue.300', 'primary.600'),
+                                bg: useColorModeValue('gray.50', '#2f3441')
+                              }}
+                              _focus={{ 
+                                borderColor: useColorModeValue('blue.500', 'primary.500'),
+                                boxShadow: useColorModeValue('0 0 0 1px rgba(66, 153, 225, 0.6)', 'none'),
+                                bg: useColorModeValue('white', '#2f3441')
+                              }}
+                              sx={{
+                                '& > option': {
+                                  paddingRight: '8px',
+                                  backgroundColor: useColorModeValue('#ffffff', '#2a2f3a'),
+                                  color: useColorModeValue('gray.800', '#e2e8f0')
+                                }
+                              }}
+                            >
+                              {Array.from({length: 24}, (_, i) => (
+                                <option key={i} value={String(i).padStart(2, '0')}>
+                                  {String(i).padStart(2, '0')}:00
+                                </option>
+                              ))}
+                            </Select>
+                          </HStack>
+                        </Box>
+                      </VStack>
+                    </Box>
+                    
+                    <Button
+                      leftIcon={<Search size={16} />}
+                      colorScheme="blue"
+                      size="sm"
+                      w="100%"
+                      onClick={handleConsultarRutas}
+                      isLoading={isLoading}
+                      loadingText="Consultando..."
+                      isDisabled={!fechaInicioDate || !fechaFinDate || checkedBuses.size === 0}
+                      _hover={{
+                        transform: 'translateY(-1px)',
+                        boxShadow: 'md'
+                      }}
+                      transition="all 0.2s"
+                    >
+                      Consultar Rutas ({checkedBuses.size})
+                    </Button>
                   </VStack>
+
+                  {/* Select All / Deselect All Controls */}
+                  <HStack spacing={2} w="100%" mb={3}>
+                    {/* <Button
+                      leftIcon={<CheckSquare size={14} />}
+                      size="xs"
+                      colorScheme="green"
+                      variant="outline"
+                      flex={1}
+                      onClick={handleSelectAll}
+                      isDisabled={filteredBuses.length === 0}
+                      _hover={{
+                        bg: 'green.50',
+                        borderColor: 'green.300'
+                      }}
+                    >
+                      Todas
+                    </Button> */}
+                    <Button
+                      leftIcon={<SquareIcon size={14} />}
+                      size="xs"
+                      colorScheme="red"
+                      variant="outline"
+                      flex={1}
+                      onClick={handleDeselectAll}
+                      isDisabled={checkedBuses.size === 0}
+                      _hover={{
+                        bg: 'red.50',
+                        borderColor: 'red.300'
+                      }}
+                    >
+                      Ninguna
+                    </Button>
+                  </HStack>
 
                   <Box
                     maxH="500px"
@@ -452,11 +790,13 @@ const TrackPlayerPage = () => {
                     }}
                   >
                     {filteredBuses.map(bus => (
-                      <BusItem
+                      <TrackBusItem
                         key={bus.id}
                         bus={bus}
                         isSelected={selectedBus === bus.id}
+                        isChecked={checkedBuses.has(bus.id)}
                         onClick={() => handleBusClick(bus.id)}
+                        onCheck={(isChecked) => handleBusCheck(bus.id, isChecked)}
                         onDragStart={(e) => handleDragStart(e, bus)}
                       />
                     ))}
@@ -471,7 +811,7 @@ const TrackPlayerPage = () => {
                 position="absolute"
                 left="10px"
                 top="20px"
-                zIndex="10"
+                zIndex="1000"
                 transition="all 0.3s ease-in-out"
               >
                 <IconButton
