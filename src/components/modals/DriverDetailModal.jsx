@@ -85,9 +85,13 @@ const DriverDetailModal = ({ isOpen, onClose, driver, onSave }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Modal states for adding new evaluations and trainings
+  const [isEvaluationModalOpen, setIsEvaluationModalOpen] = useState(false);
+  const [isTrainingModalOpen, setIsTrainingModalOpen] = useState(false);
 
   // Mock data for evaluations, trainings, and schedules
-  const [evaluaciones] = useState([
+  const [evaluaciones, setEvaluaciones] = useState([
     {
       id: 'EVAL-001',
       fecha: '2024-01-15',
@@ -106,7 +110,7 @@ const DriverDetailModal = ({ isOpen, onClose, driver, onSave }) => {
     }
   ]);
 
-  const [capacitaciones] = useState([
+  const [capacitaciones, setCapacitaciones] = useState([
     {
       id: 'CAP-001',
       curso: 'Manejo Defensivo',
@@ -341,6 +345,44 @@ const DriverDetailModal = ({ isOpen, onClose, driver, onSave }) => {
       case 'Pendiente': return 'orange';
       default: return 'gray';
     }
+  };
+
+  // Handle new evaluation
+  const handleNewEvaluation = (newEvaluation) => {
+    const evaluationWithId = {
+      ...newEvaluation,
+      id: `EVAL-${String(Date.now()).slice(-3)}`,
+      fecha: new Date().toISOString().split('T')[0]
+    };
+    setEvaluaciones(prev => [...prev, evaluationWithId]);
+    setIsEvaluationModalOpen(false);
+    
+    toast({
+      title: 'Evaluación agregada',
+      description: `Nueva evaluación de ${newEvaluation.tipo} registrada`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  // Handle new training
+  const handleNewTraining = (newTraining) => {
+    const trainingWithId = {
+      ...newTraining,
+      id: `CAP-${String(Date.now()).slice(-3)}`,
+      fecha: new Date().toISOString().split('T')[0]
+    };
+    setCapacitaciones(prev => [...prev, trainingWithId]);
+    setIsTrainingModalOpen(false);
+    
+    toast({
+      title: 'Capacitación agregada',
+      description: `Nueva capacitación de ${newTraining.curso} registrada`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
   };
 
   const bgColor = useColorModeValue('white', '#252a36');
@@ -746,7 +788,12 @@ const DriverDetailModal = ({ isOpen, onClose, driver, onSave }) => {
                       <Text fontSize="md" fontWeight="semibold" color={useColorModeValue('gray.700', 'gray.300')}>
                         Evaluaciones de Desempeño
                       </Text>
-                      <Button leftIcon={<Plus size={16} />} size="sm" colorScheme="blue">
+                      <Button 
+                        leftIcon={<Plus size={16} />} 
+                        size="sm" 
+                        colorScheme="blue"
+                        onClick={() => setIsEvaluationModalOpen(true)}
+                      >
                         Nueva Evaluación
                       </Button>
                     </HStack>
@@ -797,7 +844,12 @@ const DriverDetailModal = ({ isOpen, onClose, driver, onSave }) => {
                       <Text fontSize="md" fontWeight="semibold" color={useColorModeValue('gray.700', 'gray.300')}>
                         Capacitaciones y Certificaciones
                       </Text>
-                      <Button leftIcon={<Plus size={16} />} size="sm" colorScheme="green">
+                      <Button 
+                        leftIcon={<Plus size={16} />} 
+                        size="sm" 
+                        colorScheme="green"
+                        onClick={() => setIsTrainingModalOpen(true)}
+                      >
                         Nueva Capacitación
                       </Button>
                     </HStack>
@@ -921,7 +973,301 @@ const DriverDetailModal = ({ isOpen, onClose, driver, onSave }) => {
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
+
+      {/* New Evaluation Modal */}
+      <EvaluationModal
+        isOpen={isEvaluationModalOpen}
+        onClose={() => setIsEvaluationModalOpen(false)}
+        onSave={handleNewEvaluation}
+        driverName={`${driver?.nombre} ${driver?.apellidos}`}
+      />
+
+      {/* New Training Modal */}
+      <TrainingModal
+        isOpen={isTrainingModalOpen}
+        onClose={() => setIsTrainingModalOpen(false)}
+        onSave={handleNewTraining}
+        driverName={`${driver?.nombre} ${driver?.apellidos}`}
+      />
     </>
+  );
+};
+
+// Evaluation Modal Component
+const EvaluationModal = ({ isOpen, onClose, onSave, driverName }) => {
+  const [formData, setFormData] = useState({
+    tipo: '',
+    puntuacion: '',
+    evaluador: '',
+    comentarios: ''
+  });
+
+  const toast = useToast();
+  const bgColor = useColorModeValue('white', '#252a36');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+
+  const handleSubmit = () => {
+    if (!formData.tipo || !formData.puntuacion || !formData.evaluador) {
+      toast({
+        title: 'Campos requeridos',
+        description: 'Por favor completa todos los campos obligatorios',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    onSave(formData);
+    setFormData({
+      tipo: '',
+      puntuacion: '',
+      evaluador: '',
+      comentarios: ''
+    });
+  };
+
+  const handleClose = () => {
+    setFormData({
+      tipo: '',
+      puntuacion: '',
+      evaluador: '',
+      comentarios: ''
+    });
+    onClose();
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} size="lg">
+      <ModalOverlay />
+      <ModalContent bg={bgColor} border="1px solid" borderColor={borderColor}>
+        <ModalHeader>
+          <HStack spacing={3}>
+            <Box
+              p={2}
+              bg={useColorModeValue('blue.50', 'blue.900')}
+              borderRadius="lg"
+            >
+              <Award size={20} color={useColorModeValue('#3182ce', '#63b3ed')} />
+            </Box>
+            <VStack align="start" spacing={0}>
+              <Text>Nueva Evaluación</Text>
+              <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+                {driverName}
+              </Text>
+            </VStack>
+          </HStack>
+        </ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <VStack spacing={4} align="stretch">
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">Tipo de Evaluación</FormLabel>
+              <Select
+                value={formData.tipo}
+                onChange={(e) => setFormData({...formData, tipo: e.target.value})}
+                placeholder="Seleccionar tipo"
+                size="sm"
+              >
+                <option value="Desempeño">Desempeño</option>
+                <option value="Seguridad">Seguridad</option>
+                <option value="Manejo Defensivo">Manejo Defensivo</option>
+                <option value="Conocimiento de Rutas">Conocimiento de Rutas</option>
+                <option value="Atención al Usuario">Atención al Usuario</option>
+                <option value="Seguridad Vehicular">Seguridad Vehicular</option>
+              </Select>
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">Puntuación (0-100)</FormLabel>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={formData.puntuacion}
+                onChange={(e) => setFormData({...formData, puntuacion: e.target.value})}
+                placeholder="Ej: 85"
+                size="sm"
+              />
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">Evaluador</FormLabel>
+              <Input
+                value={formData.evaluador}
+                onChange={(e) => setFormData({...formData, evaluador: e.target.value})}
+                placeholder="Nombre del evaluador"
+                size="sm"
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel fontSize="sm">Comentarios</FormLabel>
+              <Textarea
+                value={formData.comentarios}
+                onChange={(e) => setFormData({...formData, comentarios: e.target.value})}
+                placeholder="Observaciones sobre la evaluación..."
+                rows={3}
+                resize="none"
+                size="sm"
+              />
+            </FormControl>
+          </VStack>
+        </ModalBody>
+        <ModalFooter>
+          <HStack spacing={3}>
+            <Button variant="ghost" onClick={handleClose} size="sm">
+              Cancelar
+            </Button>
+            <Button colorScheme="blue" onClick={handleSubmit} size="sm">
+              Agregar Evaluación
+            </Button>
+          </HStack>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+};
+
+// Training Modal Component
+const TrainingModal = ({ isOpen, onClose, onSave, driverName }) => {
+  const [formData, setFormData] = useState({
+    curso: '',
+    duracion: '',
+    instructor: '',
+    estado: 'Pendiente',
+    certificado: 'No'
+  });
+
+  const toast = useToast();
+  const bgColor = useColorModeValue('white', '#252a36');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+
+  const handleSubmit = () => {
+    if (!formData.curso || !formData.duracion || !formData.instructor) {
+      toast({
+        title: 'Campos requeridos',
+        description: 'Por favor completa todos los campos obligatorios',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    onSave(formData);
+    setFormData({
+      curso: '',
+      duracion: '',
+      instructor: '',
+      estado: 'Pendiente',
+      certificado: 'No'
+    });
+  };
+
+  const handleClose = () => {
+    setFormData({
+      curso: '',
+      duracion: '',
+      instructor: '',
+      estado: 'Pendiente',
+      certificado: 'No'
+    });
+    onClose();
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} size="lg">
+      <ModalOverlay />
+      <ModalContent bg={bgColor} border="1px solid" borderColor={borderColor}>
+        <ModalHeader>
+          <HStack spacing={3}>
+            <Box
+              p={2}
+              bg={useColorModeValue('green.50', 'green.900')}
+              borderRadius="lg"
+            >
+              <BookOpen size={20} color={useColorModeValue('#38a169', '#68d391')} />
+            </Box>
+            <VStack align="start" spacing={0}>
+              <Text>Nueva Capacitación</Text>
+              <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+                {driverName}
+              </Text>
+            </VStack>
+          </HStack>
+        </ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <VStack spacing={4} align="stretch">
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">Curso/Capacitación</FormLabel>
+              <Input
+                value={formData.curso}
+                onChange={(e) => setFormData({...formData, curso: e.target.value})}
+                placeholder="Ej: Manejo Defensivo"
+                size="sm"
+              />
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">Duración</FormLabel>
+              <Input
+                value={formData.duracion}
+                onChange={(e) => setFormData({...formData, duracion: e.target.value})}
+                placeholder="Ej: 8 horas"
+                size="sm"
+              />
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">Instructor/Institución</FormLabel>
+              <Input
+                value={formData.instructor}
+                onChange={(e) => setFormData({...formData, instructor: e.target.value})}
+                placeholder="Nombre del instructor o institución"
+                size="sm"
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel fontSize="sm">Estado</FormLabel>
+              <Select
+                value={formData.estado}
+                onChange={(e) => setFormData({...formData, estado: e.target.value})}
+                size="sm"
+              >
+                <option value="Pendiente">Pendiente</option>
+                <option value="En Progreso">En Progreso</option>
+                <option value="Completado">Completado</option>
+              </Select>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel fontSize="sm">Certificado</FormLabel>
+              <Select
+                value={formData.certificado}
+                onChange={(e) => setFormData({...formData, certificado: e.target.value})}
+                size="sm"
+              >
+                <option value="No">No</option>
+                <option value="Sí">Sí</option>
+              </Select>
+            </FormControl>
+          </VStack>
+        </ModalBody>
+        <ModalFooter>
+          <HStack spacing={3}>
+            <Button variant="ghost" onClick={handleClose} size="sm">
+              Cancelar
+            </Button>
+            <Button colorScheme="green" onClick={handleSubmit} size="sm">
+              Agregar Capacitación
+            </Button>
+          </HStack>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 };
 

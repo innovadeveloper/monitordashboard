@@ -529,23 +529,14 @@ const GestionConductoresSubModule = () => {
   return (
     <Box p={6} h="100%" overflow="hidden" display="flex" flexDirection="column">
       {/* Header */}
-      <Flex justify="space-between" align="center" mb={6}>
-        <Box>
-          <Text fontSize="2xl" fontWeight="bold" color={useColorModeValue('gray.800', 'app.text.primary')}>
-            Gestión de Conductores
-          </Text>
-          <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>
-            Licencias, horarios, evaluaciones y capacitaciones
-          </Text>
-        </Box>
-        <Button
-          leftIcon={<UserPlus size={16} />}
-          colorScheme="blue"
-          size="sm"
-        >
-          Nuevo Conductor
-        </Button>
-      </Flex>
+      <Box mb={6}>
+        <Text fontSize="2xl" fontWeight="bold" color={useColorModeValue('gray.800', 'app.text.primary')}>
+          Gestión de Conductores
+        </Text>
+        <Text fontSize="sm" color={useColorModeValue('gray.600', 'app.text.secondary')}>
+          Licencias, horarios, evaluaciones y capacitaciones
+        </Text>
+      </Box>
 
       {/* Filters */}
       <HStack spacing={4} mb={6}>
