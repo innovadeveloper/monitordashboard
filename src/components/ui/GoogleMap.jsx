@@ -451,9 +451,17 @@ const GoogleMapComponent = ({ buses = [], onBusClick }) => {
           }}
         >
 
-          {/* Marcadores de buses - usando marcadores estándar de Google Maps */}
+          {/* Marcadores de buses - usando iconos de bus */}
           {isLoaded && busesWithCoordinates.map((bus, index) => {
             console.log('Renderizando marcador:', bus.id, 'en posición:', bus.lat, bus.lng);
+            
+            let color = '#10B981'; // Verde por defecto
+            switch (bus.estado) {
+              case 'active': color = '#10B981'; break;
+              case 'warning': color = '#F59E0B'; break;
+              case 'error': color = '#EF4444'; break;
+              default: color = '#6B7280';
+            }
             
             return (
               <Marker
@@ -461,10 +469,28 @@ const GoogleMapComponent = ({ buses = [], onBusClick }) => {
                 position={{ lat: bus.lat, lng: bus.lng }}
                 onClick={() => handleMarkerClick(bus)}
                 title={`${bus.id} - ${bus.conductor}`}
-                label={{
-                  text: (index + 1).toString(),
-                  color: 'white',
-                  fontWeight: 'bold'
+                icon={{
+                  url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                      <!-- Cuerpo del bus -->
+                      <rect x="8" y="15" width="24" height="12" rx="2" fill="${color}" stroke="#FFFFFF" stroke-width="2"/>
+                      <!-- Ventanas -->
+                      <rect x="10" y="17" width="3" height="3" fill="#87CEEB" stroke="#FFFFFF" stroke-width="0.5"/>
+                      <rect x="14" y="17" width="3" height="3" fill="#87CEEB" stroke="#FFFFFF" stroke-width="0.5"/>
+                      <rect x="18" y="17" width="3" height="3" fill="#87CEEB" stroke="#FFFFFF" stroke-width="0.5"/>
+                      <rect x="22" y="17" width="3" height="3" fill="#87CEEB" stroke="#FFFFFF" stroke-width="0.5"/>
+                      <rect x="26" y="17" width="3" height="3" fill="#87CEEB" stroke="#FFFFFF" stroke-width="0.5"/>
+                      <!-- Puerta -->
+                      <rect x="28" y="21" width="2" height="5" fill="#666666"/>
+                      <!-- Ruedas -->
+                      <circle cx="13" cy="29" r="2.5" fill="#333333" stroke="#FFFFFF" stroke-width="1"/>
+                      <circle cx="27" cy="29" r="2.5" fill="#333333" stroke="#FFFFFF" stroke-width="1"/>
+                      <!-- Número del bus -->
+                      <text x="20" y="24" text-anchor="middle" fill="white" font-size="8" font-weight="bold">${index + 1}</text>
+                    </svg>
+                  `),
+                  scaledSize: { width: 40, height: 40 },
+                  anchor: { x: 20, y: 20 } // Centrar el icono
                 }}
               />
             );
