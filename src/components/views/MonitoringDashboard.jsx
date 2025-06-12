@@ -68,7 +68,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const mockBuses = [
   {
     id: "BUS-1565",
-    conductor: "Juan Pérez",
+    conductor: "Juan Pérez 2",
     tiempo: "08:34 AM",
     ruta: "Ruta 1 → Terminal Norte",
     estado: "active",
