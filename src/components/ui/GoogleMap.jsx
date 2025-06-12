@@ -525,9 +525,9 @@ const GoogleMapComponent = ({ buses = [], onBusClick }) => {
             
             console.log('Renderizando InfoWindow para:', selectedBus.id, 'en posición:', position);
             
-            // Ajustar la posición para que aparezca arriba del marcador
+            // Ajustar posición ligeramente hacia arriba geográficamente
             const infoWindowPosition = {
-              lat: position.lat + 0.001, // Mover solo 0.001 grados hacia arriba
+              lat: position.lat + 0.0005, // Muy pequeño ajuste geográfico
               lng: position.lng
             };
             
@@ -539,7 +539,7 @@ const GoogleMapComponent = ({ buses = [], onBusClick }) => {
                   setSelectedBus(null);
                 }}
                 options={{
-                  pixelOffset: new window.google.maps.Size(0, -15) // Offset más pequeño hacia arriba
+                  pixelOffset: new window.google.maps.Size(0, -10) // Pequeño offset adicional
                 }}
               >
                 <Box p={2} maxW="280px">
