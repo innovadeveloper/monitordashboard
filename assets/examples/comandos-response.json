@@ -1,0 +1,101 @@
+{
+  "llamada": {
+    "success": true,
+    "comando": {
+      "tipo": "llamada",
+      "busId": "BUS-1565",
+      "conductor": "Juan Pérez",
+      "timestamp": "2024-12-06T15:34:20Z",
+      "parametros": {
+        "numero": "+51 999 123 456",
+        "duracionMaxima": 300
+      },
+      "estado": "completado",
+      "respuesta": {
+        "exitoso": true,
+        "mensaje": "Llamada realizada con éxito",
+        "duracionReal": 118,
+        "calidad": "buena",
+        "codigoRespuesta": 200
+      }
+    }
+  },
+  "mensaje_tts": {
+    "success": true,
+    "comando": {
+      "tipo": "mensaje_tts",
+      "busId": "BUS-1565",
+      "conductor": "Juan Pérez",
+      "timestamp": "2024-12-06T15:35:10Z",
+      "parametros": {
+        "mensaje": "Por favor, reduzca la velocidad y mantenga la distancia de seguridad",
+        "volumen": 80,
+        "idioma": "es-PE"
+      },
+      "estado": "enviado",
+      "respuesta": {
+        "exitoso": true,
+        "mensaje": "Mensaje TTS reproducido correctamente",
+        "duracion": 8,
+        "confirmacionConductor": true,
+        "codigoRespuesta": 200
+      }
+    }
+  },
+  "solicitar_foto": {
+    "success": true,
+    "comando": {
+      "tipo": "solicitar_foto",
+      "busId": "BUS-1565",
+      "conductor": "Juan Pérez",
+      "timestamp": "2024-12-06T15:36:05Z",
+      "parametros": {
+        "camaras": ["frontal", "lateral_derecha", "trasera"],
+        "calidad": "alta",
+        "timestamp": true
+      },
+      "estado": "procesando",
+      "respuesta": {
+        "exitoso": true,
+        "mensaje": "Captura de fotos iniciada",
+        "fotosCapturadas": [
+          {
+            "camara": "frontal",
+            "url": "https://storage.example.com/photos/BUS-1565/frontal_20241206153605.jpg",
+            "timestamp": "2024-12-06T15:36:05Z",
+            "tamaño": "2.4 MB",
+            "resolucion": "1920x1080"
+          },
+          {
+            "camara": "lateral_derecha",
+            "url": "https://storage.example.com/photos/BUS-1565/lateral_20241206153606.jpg",
+            "timestamp": "2024-12-06T15:36:06Z",
+            "tamaño": "2.1 MB",
+            "resolucion": "1920x1080"
+          },
+          {
+            "camara": "trasera",
+            "url": "https://storage.example.com/photos/BUS-1565/trasera_20241206153607.jpg",
+            "timestamp": "2024-12-06T15:36:07Z",
+            "tamaño": "2.3 MB",
+            "resolucion": "1920x1080"
+          }
+        ],
+        "totalFotos": 3,
+        "codigoRespuesta": 200
+      }
+    }
+  },
+  "error_comando": {
+    "success": false,
+    "error": {
+      "codigo": "DEVICE_OFFLINE",
+      "mensaje": "El dispositivo del vehículo está desconectado",
+      "detalles": "No se pudo establecer comunicación con BUS-2535",
+      "timestamp": "2024-12-06T15:37:00Z",
+      "busId": "BUS-2535",
+      "conductor": "Carlos López",
+      "ultimaConexion": "2024-12-06T14:15:00Z"
+    }
+  }
+}

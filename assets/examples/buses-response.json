@@ -1,0 +1,129 @@
+{
+  "success": true,
+  "timestamp": "2024-12-06T15:34:20Z",
+  "total": 5,
+  "buses": [
+    {
+      "id": "BUS-1565",
+      "conductor": "Juan Pérez",
+      "tiempo": "08:34 AM",
+      "ruta": "Ruta 1 → Terminal Norte",
+      "estado": "active",
+      "alertas": 0,
+      "velocidad": "45 km/h",
+      "telefono": "+51 999 123 456",
+      "fotos": [
+        "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop"
+      ],
+      "coordenadas": {
+        "lat": -12.046373,
+        "lng": -77.042755
+      },
+      "dispositivo": {
+        "imei": "123456789012345",
+        "bateria": 85,
+        "senal": 4
+      },
+      "fechaActualizacion": "2024-12-06T15:34:20Z"
+    },
+    {
+      "id": "BUS-1357",
+      "conductor": "María González",
+      "tiempo": "08:22 AM",
+      "ruta": "Ruta 2 → Con retraso",
+      "estado": "warning",
+      "alertas": 1,
+      "velocidad": "38 km/h",
+      "telefono": "+51 999 234 567",
+      "fotos": [
+        "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop"
+      ],
+      "coordenadas": {
+        "lat": -12.056373,
+        "lng": -77.052755
+      },
+      "dispositivo": {
+        "imei": "123456789012346",
+        "bateria": 72,
+        "senal": 3
+      },
+      "fechaActualizacion": "2024-12-06T15:22:15Z"
+    },
+    {
+      "id": "BUS-2535",
+      "conductor": "Carlos López",
+      "tiempo": "08:15 AM",
+      "ruta": "Ruta 3 → Fuera de ruta",
+      "estado": "error",
+      "alertas": 3,
+      "velocidad": "0 km/h",
+      "telefono": "+51 999 345 678",
+      "fotos": [
+        "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1494515843206-f3117d3f51b7?w=300&h=200&fit=crop"
+      ],
+      "coordenadas": {
+        "lat": -12.066373,
+        "lng": -77.062755
+      },
+      "dispositivo": {
+        "imei": "123456789012347",
+        "bateria": 45,
+        "senal": 2
+      },
+      "fechaActualizacion": "2024-12-06T15:15:10Z"
+    },
+    {
+      "id": "BUS-7943",
+      "conductor": "Ana Torres",
+      "tiempo": "08:18 AM",
+      "ruta": "Ruta 1 → En tiempo",
+      "estado": "active",
+      "alertas": 0,
+      "velocidad": "42 km/h",
+      "telefono": "+51 999 456 789",
+      "fotos": [
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=300&h=200&fit=crop"
+      ],
+      "coordenadas": {
+        "lat": -12.036373,
+        "lng": -77.032755
+      },
+      "dispositivo": {
+        "imei": "123456789012348",
+        "bateria": 91,
+        "senal": 4
+      },
+      "fechaActualizacion": "2024-12-06T15:18:05Z"
+    },
+    {
+      "id": "BUS-7054",
+      "conductor": "Roberto Silva",
+      "tiempo": "08:43 AM",
+      "ruta": "Ruta 2 → Velocidad alta",
+      "estado": "warning",
+      "alertas": 1,
+      "velocidad": "65 km/h",
+      "telefono": "+51 999 567 890",
+      "fotos": [
+        "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop"
+      ],
+      "coordenadas": {
+        "lat": -12.026373,
+        "lng": -77.022755
+      },
+      "dispositivo": {
+        "imei": "123456789012349",
+        "bateria": 68,
+        "senal": 3
+      },
+      "fechaActualizacion": "2024-12-06T15:43:12Z"
+    }
+  ]
+}

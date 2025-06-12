@@ -1,0 +1,82 @@
+{
+  "success": true,
+  "timestamp": "2024-12-06T15:34:20Z",
+  "total": 4,
+  "alertas": [
+    {
+      "id": "ALT-001",
+      "busId": "BUS-7054",
+      "conductor": "Roberto Silva",
+      "tipo": "velocidad_alta",
+      "mensaje": "Velocidad excesiva detectada: 75 km/h en zona urbana",
+      "timestamp": "2024-12-06T15:30:00Z",
+      "severidad": "alta",
+      "coordenadas": {
+        "lat": -12.026373,
+        "lng": -77.022755
+      },
+      "resuelto": false,
+      "acciones": [
+        "notificar_conductor",
+        "reducir_velocidad",
+        "contactar_supervisor"
+      ]
+    },
+    {
+      "id": "ALT-002",
+      "busId": "BUS-2535",
+      "conductor": "Carlos López",
+      "tipo": "fuera_ruta",
+      "mensaje": "Vehículo se encuentra fuera de la ruta asignada",
+      "timestamp": "2024-12-06T14:45:00Z",
+      "severidad": "media",
+      "coordenadas": {
+        "lat": -12.070373,
+        "lng": -77.068755
+      },
+      "resuelto": false,
+      "acciones": [
+        "contactar_conductor",
+        "verificar_destino",
+        "actualizar_ruta"
+      ]
+    },
+    {
+      "id": "ALT-003",
+      "busId": "BUS-2535",
+      "conductor": "Carlos López",
+      "tipo": "vehiculo_detenido",
+      "mensaje": "Vehículo detenido por más de 15 minutos sin reporte",
+      "timestamp": "2024-12-06T14:15:00Z",
+      "severidad": "alta",
+      "coordenadas": {
+        "lat": -12.066373,
+        "lng": -77.062755
+      },
+      "resuelto": false,
+      "acciones": [
+        "llamar_conductor",
+        "verificar_emergencia",
+        "enviar_asistencia"
+      ]
+    },
+    {
+      "id": "ALT-004",
+      "busId": "BUS-1357",
+      "conductor": "María González",
+      "tipo": "retraso_horario",
+      "mensaje": "Retraso de 12 minutos en horario programado",
+      "timestamp": "2024-12-06T13:22:00Z",
+      "severidad": "baja",
+      "coordenadas": {
+        "lat": -12.056373,
+        "lng": -77.052755
+      },
+      "resuelto": true,
+      "acciones": [
+        "ajustar_horario",
+        "notificar_pasajeros"
+      ]
+    }
+  ]
+}

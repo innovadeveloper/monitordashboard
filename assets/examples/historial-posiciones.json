@@ -1,0 +1,121 @@
+{
+  "success": true,
+  "busId": "BUS-1565",
+  "conductor": "Juan Pérez",
+  "fechaInicio": "2024-12-06T05:00:00Z",
+  "fechaFin": "2024-12-06T15:34:20Z",
+  "totalPuntos": 127,
+  "distanciaRecorrida": "245.8 km",
+  "tiempoTotal": "10h 34m",
+  "posiciones": [
+    {
+      "timestamp": "2024-12-06T05:00:00Z",
+      "lat": -12.046373,
+      "lng": -77.042755,
+      "velocidad": "0 km/h",
+      "rumbo": 0,
+      "evento": "inicio_jornada",
+      "combustible": 85,
+      "odometro": 142580
+    },
+    {
+      "timestamp": "2024-12-06T05:15:00Z",
+      "lat": -12.048373,
+      "lng": -77.044755,
+      "velocidad": "25 km/h",
+      "rumbo": 185,
+      "evento": "inicio_ruta",
+      "combustible": 84,
+      "odometro": 142586
+    },
+    {
+      "timestamp": "2024-12-06T05:30:00Z",
+      "lat": -12.052373,
+      "lng": -77.048755,
+      "velocidad": "45 km/h",
+      "rumbo": 190,
+      "evento": "en_ruta",
+      "combustible": 83,
+      "odometro": 142598
+    },
+    {
+      "timestamp": "2024-12-06T05:45:00Z",
+      "lat": -12.056373,
+      "lng": -77.052755,
+      "velocidad": "35 km/h",
+      "rumbo": 185,
+      "evento": "parada_programada",
+      "combustible": 82,
+      "odometro": 142605
+    },
+    {
+      "timestamp": "2024-12-06T06:00:00Z",
+      "lat": -12.060373,
+      "lng": -77.056755,
+      "velocidad": "40 km/h",
+      "rumbo": 180,
+      "evento": "en_ruta",
+      "combustible": 81,
+      "odometro": 142612
+    },
+    {
+      "timestamp": "2024-12-06T06:15:00Z",
+      "lat": -12.066373,
+      "lng": -77.062755,
+      "velocidad": "30 km/h",
+      "rumbo": 220,
+      "evento": "terminal_destino",
+      "combustible": 80,
+      "odometro": 142620
+    },
+    {
+      "timestamp": "2024-12-06T06:30:00Z",
+      "lat": -12.066373,
+      "lng": -77.062755,
+      "velocidad": "0 km/h",
+      "rumbo": 0,
+      "evento": "descanso",
+      "combustible": 80,
+      "odometro": 142620
+    },
+    {
+      "timestamp": "2024-12-06T07:00:00Z",
+      "lat": -12.066373,
+      "lng": -77.062755,
+      "velocidad": "20 km/h",
+      "rumbo": 45,
+      "evento": "inicio_retorno",
+      "combustible": 79,
+      "odometro": 142622
+    },
+    {
+      "timestamp": "2024-12-06T07:15:00Z",
+      "lat": -12.060373,
+      "lng": -77.056755,
+      "velocidad": "50 km/h",
+      "rumbo": 360,
+      "evento": "en_ruta",
+      "combustible": 78,
+      "odometro": 142635
+    },
+    {
+      "timestamp": "2024-12-06T15:34:20Z",
+      "lat": -12.046373,
+      "lng": -77.042755,
+      "velocidad": "45 km/h",
+      "rumbo": 180,
+      "evento": "posicion_actual",
+      "combustible": 42,
+      "odometro": 142826
+    }
+  ],
+  "estadisticas": {
+    "velocidadPromedio": "38.5 km/h",
+    "velocidadMaxima": "72 km/h",
+    "tiempoMovimiento": "8h 45m",
+    "tiempoDetenido": "1h 49m",
+    "paradasRealizadas": 18,
+    "consumoCombustible": "43 litros",
+    "rendimiento": "5.7 km/l"
+  }
+}
