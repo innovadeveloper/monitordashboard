@@ -9,9 +9,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: coordenadasdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: generic_track_db
     volumes:
       - pgdata:/var/lib/postgresql/data
     # Comando básico sin shared_preload_libraries problemático

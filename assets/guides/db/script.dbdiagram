@@ -1,58 +1,37 @@
+// ========================================
+// ESQUEMA POSTGRESQL OPTIMIZADO
+// Redis maneja cálculos geoespaciales
+// PostgreSQL solo registra eventos procesados
+// ========================================
 
-Table users {
+// ========================================
+// MÓDULO DE USUARIOS (LDAP) - SIN CAMBIOS
+// ========================================
+
+Table user_profiles {
   id integer [primary key, increment]
-  email varchar(100) [unique, not null]
-  password_hash varchar(255) [not null]
-  first_name varchar(50) [not null]
-  last_name varchar(50) [not null]
-  phone varchar(20)
+  ldap_uid varchar(50) [unique, not null]
+  dni varchar(8) [unique]
+  user_type varchar(20) [not null, note: 'CONDUCTOR, ADMINISTRADOR, MONITOREADOR']
   is_active boolean [default: true]
+  last_login timestamp
+  preferences jsonb
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
   updated_at timestamp [default: `CURRENT_TIMESTAMP`]
   
-  Note: 'Tabla base para autenticación y datos comunes de usuarios'
-}
-
-Table roles {
-  id integer [primary key, increment]
-  name varchar(50) [unique, not null, note: 'CONDUCTOR, ADMINISTRADOR, MONITOREADOR']
-  display_name varchar(100) [not null]
-  permissions jsonb [note: 'Permisos específicos del rol en formato JSON']
-  is_active boolean [default: true]
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  Note: 'Catálogo de roles del sistema con sus permisos'
-}
-
-Table user_roles {
-  id integer [primary key, increment]
-  user_id integer [ref: > users.id]
-  role_id integer [ref: > roles.id]
-  assigned_at timestamp [default: `CURRENT_TIMESTAMP`]
-  assigned_by integer [ref: > users.id]
-  is_active boolean [default: true]
-  
   indexes {
-    (user_id, role_id) [unique, name: 'idx_user_role_unique']
-    (user_id) [name: 'idx_user_roles_user']
+    (ldap_uid) [name: 'idx_profiles_ldap_uid']
+    (user_type, is_active) [name: 'idx_profiles_type_active']
   }
-  
-  Note: 'Asignación de roles a usuarios (permite múltiples roles)'
 }
 
 Table drivers {
   id integer [primary key, increment]
-  user_id integer [ref: > users.id, unique]
+  user_profile_id integer [ref: > user_profiles.id, unique]
   driver_license varchar(20) [not null, unique]
-  license_type varchar(10) [not null, note: 'A-IIa, A-IIb']
+  license_type varchar(10) [not null]
   license_expiry date [not null]
-  experience_years integer
-  medical_certificate_expiry date
-  emergency_contact_name varchar(100)
-  emergency_contact_phone varchar(20)
-  address text
-  hire_date date
-  status varchar(20) [default: 'ACTIVE', note: 'ACTIVE, SUSPENDED, TERMINATED']
+  status varchar(20) [default: 'ACTIVE']
   current_vehicle_id integer [ref: > vehicles.id]
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
   updated_at timestamp [default: `CURRENT_TIMESTAMP`]
@@ -61,126 +40,64 @@ Table drivers {
     (status, license_expiry) [name: 'idx_drivers_status_license']
     (current_vehicle_id) [name: 'idx_drivers_current_vehicle']
   }
-  
-  Note: 'Información específica de conductores con licencias y turnos'
-}
-
-Table administrators {
-  id integer [primary key, increment]
-  user_id integer [ref: > users.id, unique]
-  employee_code varchar(20) [unique]
-  department varchar(50)
-  position varchar(100)
-  supervisor_id integer [ref: > administrators.id]
-  access_level integer [default: 1, note: '1-5, siendo 5 el más alto']
-  can_modify_routes boolean [default: false]
-  can_manage_users boolean [default: false]
-  can_view_reports boolean [default: true]
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  indexes {
-    (access_level) [name: 'idx_admin_access_level']
-    (supervisor_id) [name: 'idx_admin_supervisor']
-  }
-  
-  Note: 'Información específica de administradores con permisos y jerarquía'
-}
-
-Table monitors {
-  id integer [primary key, increment]
-  user_id integer [ref: > users.id, unique]
-  shift_type varchar(20) [not null, note: 'MORNING, AFTERNOON, NIGHT, 24H']
-  assigned_routes jsonb [note: 'Array de IDs de rutas asignadas']
-  can_manage_alerts boolean [default: true]
-  monitoring_station integer [note: 'Número de estación de monitoreo']
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  //indexes {
-    //(shift_type) [name: 'idx_monitors_shift']
-    //(monitoring_station) [name: 'idx_monitors_station']
-  //}
-  
-  Note: 'Información específica de monitoreadores con turnos y permisos'
-}
-
-Table driver_shifts {
-  id bigint [primary key, increment]
-  driver_id integer [ref: > drivers.id]
-  vehicle_id integer [ref: > vehicles.id]
-  route_id integer [ref: > routes.id]
-  shift_start timestamp [not null]
-  shift_end timestamp
-  kilometers_driven decimal(8,2)
-  fuel_consumed decimal(6,2)
-  incidents_count integer [default: 0]
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  indexes {
-    (driver_id, shift_start) [name: 'idx_shifts_driver_start']
-    (vehicle_id, shift_start) [name: 'idx_shifts_vehicle_start']
-    (shift_start, shift_end) [name: 'idx_shifts_period']
-  }
-  
-  Note: 'Historial de turnos de conductores con métricas operativas'
-}
-
-Table driver_evaluations {
-  id integer [primary key, increment]
-  driver_id integer [ref: > drivers.id]
-  evaluator_id integer [ref: > administrators.id]
-  evaluation_date date [not null]
-  punctuality_score integer [note: 'Escala 1-10']
-  safety_score integer [note: 'Escala 1-10']
-  customer_service_score integer [note: 'Escala 1-10']
-  overall_score decimal(3,1)
-  comments text
-  action_required boolean [default: false]
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  indexes {
-    (driver_id, evaluation_date) [name: 'idx_evaluations_driver_date']
-    (overall_score) [name: 'idx_evaluations_score']
-  }
-  
-  Note: 'Evaluaciones de desempeño de conductores'
-}
-
-Table training_records {
-  id integer [primary key, increment]
-  user_id integer [ref: > users.id]
-  training_type varchar(100) [not null]
-  training_date date [not null]
-  completion_date date
-  certification_number varchar(50)
-  expiry_date date
-  instructor varchar(100)
-  status varchar(20) [default: 'COMPLETED', note: 'PENDING, COMPLETED, EXPIRED']
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  indexes {
-    (user_id, training_type) [name: 'idx_training_user_type']
-    (expiry_date) [name: 'idx_training_expiry']
-    (status) [name: 'idx_training_status']
-  }
-  
-  Note: 'Registro de capacitaciones y certificaciones de personal'
 }
 
 // ========================================
-// MÓDULO DE RUTAS Y VEHÍCULOS
+// MÓDULO DE RUTAS Y VEHÍCULOS - SIMPLIFICADO
 // ========================================
 
 Table routes {
   id integer [primary key, increment]
   name varchar(100) [not null]
   code varchar(20) [not null, unique]
-  color varchar(7) [default: '#0066CC', note: 'Color hex para el mapa']
+  color varchar(7) [default: '#0066CC']
   is_active boolean [default: true]
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table route_polylines {
+  id integer [primary key, increment]
+  route_id integer [ref: > routes.id, not null]
+  name varchar(100) [not null, note: 'Ruta A1 - Ida, Ruta A1 - Vuelta']
+  direction varchar(20) [not null, note: 'IDA, VUELTA, BIDIRECCIONAL']
   
-  Note: 'Rutas del sistema de transporte'
+  // Coordenadas para visualización y validación JTS
+  coordinates_json jsonb [not null, note: 'Array: [[lat,lng], [lat,lng], ...] para JTS']
+  encoded_polyline text [note: 'Google encoded polyline para optimización web']
+  
+  // Configuración visual para mapas
+  color varchar(7) [note: 'Color específico (hereda de ruta si es null)']
+  stroke_width integer [default: 4]
+  stroke_opacity decimal(3,2) [default: 0.8]
+  
+  // Metadatos calculados
+  total_distance_km decimal(6,2) [note: 'Distancia total automática']
+  estimated_time_minutes integer [note: 'Tiempo estimado de recorrido']
+  
+  // Para validación de desvíos con JTS
+  corridor_width_meters integer [default: 100, note: 'Ancho del corredor permitido']
+  deviation_tolerance_meters integer [default: 50, note: 'Tolerancia antes de alerta']
+  
+  // Control de sincronización con Redis/JTS - MEJORADO
+  geometry_hash varchar(64) [note: 'SHA256 de coordinates_json para detectar cambios']
+  config_hash varchar(64) [note: 'SHA256 de configuración completa (color, width, etc.)']
+  jts_cached_at timestamp [note: 'Última vez que se cacheó geometría JTS en memoria']
+  redis_synced_at timestamp [note: 'Última sincronización a Redis']
+  redis_sync_key varchar(100) [note: 'Clave en Redis para geometría']
+  
+  is_active boolean [default: true]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+  created_by_profile_id integer [ref: > user_profiles.id]
+  
+  indexes {
+    (route_id, direction, is_active) [name: 'idx_polylines_route_direction']
+    (is_active, redis_synced_at) [name: 'idx_polylines_sync_status']
+    (redis_sync_key) [name: 'idx_polylines_redis_key']
+    (geometry_hash, config_hash) [name: 'idx_polylines_hashes']
+  }
+  
+  Note: 'Polilíneas de rutas para visualización y validación de desvíos con JTS'
 }
 
 Table vehicles {
@@ -188,151 +105,85 @@ Table vehicles {
   plate_number varchar(10) [not null, unique]
   internal_code varchar(20) [not null, unique]
   route_id integer [ref: > routes.id]
-  vehicle_type varchar(50) [default: 'BUS']
-  brand varchar(50)
-  model varchar(50)
-  year integer
-  status varchar(20) [default: 'ACTIVE', note: 'ACTIVE, INACTIVE, MAINTENANCE']
+  status varchar(20) [default: 'ACTIVE']
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
   updated_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  Note: 'Vehículos de la flota (100 unidades)'
 }
 
 Table trackers {
   id integer [primary key, increment]
-  device_id varchar(50) [not null, unique, note: 'IMEI o ID único del dispositivo']
+  device_id varchar(50) [not null, unique]
   vehicle_id integer [ref: > vehicles.id]
-  sim_number varchar(20)
-  posting_interval integer [default: 30, note: 'Segundos entre posteos GPS']
-  status varchar(20) [default: 'ACTIVE', note: 'ACTIVE, INACTIVE, ERROR']
+  posting_interval integer [default: 30]
+  status varchar(20) [default: 'ACTIVE']
   last_seen timestamp
-  firmware_version varchar(20)
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
   updated_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  Note: 'Dispositivos GPS tracker instalados en vehículos'
 }
-
-Table location_logs {
-  id bigint [primary key, increment]
-  tracker_id integer [not null, ref: > trackers.id]
-  vehicle_id integer [ref: > vehicles.id, note: 'Desnormalizado para consultas rápidas']
-  latitude decimal(10,8) [not null]
-  longitude decimal(11,8) [not null]
-  speed decimal(5,2) [default: 0, note: 'km/h']
-  heading integer [note: 'Grados 0-359']
-  altitude decimal(8,2)
-  accuracy integer [note: 'Precisión en metros']
-  satellites integer [note: 'Número de satélites']
-  battery_level integer [note: 'Porcentaje 0-100']
-  signal_strength integer [note: 'Fuerza de señal en dBm']
-  timestamp timestamp [not null, note: 'Hora del GPS']
-  received_at timestamp [default: `CURRENT_TIMESTAMP`, note: 'Hora del servidor']
-  
-  indexes {
-    (tracker_id, timestamp) [name: 'idx_location_tracker_time']
-    (vehicle_id, timestamp) [name: 'idx_location_vehicle_time']
-    (latitude, longitude) [name: 'idx_location_coordinates']
-    (received_at) [name: 'idx_location_received']
-  }
-  
-  Note: 'Histórico completo de posiciones GPS (posteo cada N segundos)'
-}
-
-Table panic_alerts {
-  id bigint [primary key, increment]
-  tracker_id integer [not null, ref: > trackers.id]
-  vehicle_id integer [ref: > vehicles.id]
-  latitude decimal(10,8) [not null]
-  longitude decimal(11,8) [not null]
-  status varchar(20) [default: 'ACTIVE', note: 'ACTIVE, ACKNOWLEDGED, RESOLVED, FALSE_ALARM']
-  priority varchar(10) [default: 'HIGH', note: 'HIGH, MEDIUM, LOW']
-  acknowledged_by integer [note: 'ID del operador que atendió']
-  acknowledged_at timestamp
-  resolved_at timestamp
-  notes text
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  indexes {
-    (status, created_at) [name: 'idx_panic_status_time']
-    (vehicle_id, created_at) [name: 'idx_panic_vehicle_time']
-  }
-  
-  Note: 'Alertas generadas por botón de pánico'
-}
-
-Table system_events {
-  id bigint [primary key, increment]
-  event_type varchar(50) [not null, note: 'GPS_POSITION, PANIC_BUTTON, TRACKER_OFFLINE, etc.']
-  tracker_id integer [ref: > trackers.id]
-  vehicle_id integer [ref: > vehicles.id]
-  data jsonb [note: 'Datos adicionales del evento en formato JSON']
-  timestamp timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  indexes {
-    (event_type, timestamp) [name: 'idx_events_type_time']
-    (tracker_id, timestamp) [name: 'idx_events_tracker_time']
-  }
-  
-  Note: 'Log de eventos del sistema para auditoría'
-}
-
-
 
 // ========================================
-// MÓDULO DE GEOFENCING Y GEOCERCAS
+// GEOCERCAS - CONFIGURACIÓN MASTER
+// Solo para administración, Redis maneja operaciones
 // ========================================
 
 Table geofence_types {
   id integer [primary key, increment]
-  name varchar(50) [unique, not null, note: 'ROUTE_CORRIDOR, BUS_STOP, TERMINAL, RESTRICTED_ZONE, SPEED_ZONE']
+  name varchar(50) [unique, not null, note: 'BUS_STOP, TERMINAL, SPEED_ZONE, ROUTE_CORRIDOR']
   display_name varchar(100) [not null]
-  description text
-  default_alert_enabled boolean [default: true]
-  default_alert_priority varchar(10) [default: 'MEDIUM', note: 'LOW, MEDIUM, HIGH, CRITICAL']
-  color varchar(7) [default: '#FF0000', note: 'Color hex para visualización en mapa']
+  default_alert_priority varchar(10) [default: 'MEDIUM']
+  color varchar(7) [default: '#FF0000']
   is_active boolean [default: true]
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  
-  Note: 'Catálogo de tipos de geocercas con configuraciones por defecto'
 }
 
 Table geofences {
   id integer [primary key, increment]
   name varchar(100) [not null]
   geofence_type_id integer [ref: > geofence_types.id]
-  route_id integer [ref: > routes.id, note: 'Opcional: asociar geocerca a ruta específica']
-  geometry_type varchar(20) [not null, note: 'POLYGON, CIRCLE, CORRIDOR']
-  coordinates jsonb [not null, note: 'Array de coordenadas [lat,lng] para polígono o centro+radio para círculo']
-  radius_meters integer [note: 'Radio en metros para geocercas circulares']
-  // buffer_meters integer [default: 0, note: 'Buffer adicional para la geocerca']
+  route_id integer [ref: > routes.id, note: 'Opcional: para filtrar por ruta']
   
-  // Configuración de alertas
+  // Geometría simple para Redis sync
+  geometry_type varchar(20) [not null, note: 'CIRCLE, POLYGON']
+  center_latitude decimal(10,8) [note: 'Centro para círculos o centroide para polígonos']
+  center_longitude decimal(11,8)
+  radius_meters integer [note: 'Radio para círculos']
+  coordinates_json jsonb [note: 'Array de coordenadas para polígonos: [[lat,lng],...]']
+  
+  // Configuración de alertas (se sincroniza a Redis)
   alert_on_entry boolean [default: false]
   alert_on_exit boolean [default: true]
-  alert_on_dwell_time boolean [default: false]
-  max_dwell_minutes integer [note: 'Tiempo máximo permitido dentro de la geocerca']
+  alert_on_dwell boolean [default: false]
+  max_dwell_seconds integer [default: 300]
   alert_priority varchar(10) [default: 'MEDIUM']
   
+  // CONFIGURACIÓN DE VELOCIDAD
+  max_speed_kmh integer [note: 'Velocidad máxima en esta geocerca (hereda de speed_zone si es null)']
+  min_speed_kmh integer [note: 'Velocidad mínima requerida']
+  speed_alert_enabled boolean [default: true]
+  speed_tolerance_kmh integer [default: 5, note: 'Tolerancia antes de generar alerta']
+  
   // Configuración operativa
-  applies_to_routes jsonb [note: 'Array de route_ids a los que aplica esta geocerca']
-  active_hours_start time [note: 'Hora de inicio de vigencia (opcional)']
-  active_hours_end time [note: 'Hora de fin de vigencia (opcional)']
-  active_days varchar(7) [default: '1111111', note: 'Días activos: L-D (1=activo, 0=inactivo)']
+  applies_to_routes jsonb [note: 'Array de route_ids: [1,2,3]']
+  
+  // Control de sincronización con Redis - MEJORADO
+  config_hash varchar(64) [note: 'SHA256 de toda la configuración para detectar cambios']
+  redis_sync_key varchar(100) [note: 'Clave en Redis: "gf:123"']
+  redis_synced_at timestamp [note: 'Última sincronización exitosa a Redis']
+  jts_cached_at timestamp [note: 'Última vez que se cacheó geometría JTS (para polígonos)']
   
   is_active boolean [default: true]
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
   updated_at timestamp [default: `CURRENT_TIMESTAMP`]
-  created_by integer [ref: > users.id]
+  created_by_profile_id integer [ref: > user_profiles.id]
   
   indexes {
     (geofence_type_id, is_active) [name: 'idx_geofences_type_active']
-    (route_id) [name: 'idx_geofences_route']
-    (is_active, alert_priority) [name: 'idx_geofences_active_priority']
+    (is_active, redis_synced_at) [name: 'idx_geofences_sync_status']
+    (redis_sync_key) [name: 'idx_geofences_redis_key']
+    (config_hash) [name: 'idx_geofences_config_hash']
   }
   
-  Note: 'Definición de geocercas con geometría y configuración de alertas'
+  Note: 'Configuración master de geocercas - se sincroniza a Redis para operaciones'
 }
 
 Table bus_stops {
@@ -342,164 +193,353 @@ Table bus_stops {
   route_id integer [ref: > routes.id]
   latitude decimal(10,8) [not null]
   longitude decimal(11,8) [not null]
-  stop_order integer [note: 'Orden del paradero en la ruta']
-  geofence_id integer [ref: > geofences.id, note: 'Geocerca asociada al paradero']
+  stop_order integer
+  geofence_id integer [ref: > geofences.id]
   
-  // Configuración del paradero
+  // Configuración específica del paradero
   is_terminal boolean [default: false]
-  min_stop_seconds integer [default: 30, note: 'Tiempo mínimo de parada']
-  max_stop_seconds integer [default: 300, note: 'Tiempo máximo de parada']
-  
-  // Información adicional
-  has_shelter boolean [default: false]
-  is_accessible boolean [default: false]
-  landmark_reference varchar(200)
+  min_stop_seconds integer [default: 30]
+  max_stop_seconds integer [default: 300]
   
   is_active boolean [default: true]
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
   
   indexes {
     (route_id, stop_order) [name: 'idx_stops_route_order']
-    (latitude, longitude) [name: 'idx_stops_coordinates']
     (geofence_id) [name: 'idx_stops_geofence']
   }
-  
-  Note: 'Paraderos con geocercas asociadas para control de cumplimiento'
 }
+
+// ========================================
+// EVENTOS PROCESADOS - SOLO RESULTADOS
+// Redis + JTS procesan, PostgreSQL registra
+// ========================================
 
 Table geofence_events {
   id bigint [primary key, increment]
   geofence_id integer [not null, ref: > geofences.id]
   vehicle_id integer [not null, ref: > vehicles.id]
   tracker_id integer [not null, ref: > trackers.id]
-  driver_id integer [ref: > drivers.id]
+  driver_profile_id integer [ref: > user_profiles.id]
   
-  // Datos del evento
-  event_type varchar(20) [not null, note: 'ENTRY, EXIT, DWELL_VIOLATION, ROUTE_DEVIATION']
+  // Evento procesado
+  event_type varchar(20) [not null, note: 'ENTRY, EXIT, DWELL_VIOLATION']
   latitude decimal(10,8) [not null]
   longitude decimal(11,8) [not null]
   speed decimal(5,2)
+  heading integer
   
   // Timestamps del evento
-  event_timestamp timestamp [not null, note: 'Momento del evento según GPS']
-  entry_timestamp timestamp [note: 'Cuando entró a la geocerca (para eventos EXIT)']
-  dwell_seconds integer [note: 'Tiempo que permaneció dentro de la geocerca']
+  event_timestamp timestamp [not null, note: 'Momento del evento GPS']
+  entry_timestamp timestamp [note: 'Para eventos EXIT - cuándo entró']
+  dwell_seconds integer [note: 'Tiempo dentro de la geocerca']
   
-  // Estado de la alerta
+  // Metadatos de procesamiento
+  processing_method varchar(20) [note: 'REDIS_ONLY, REDIS_JTS, JTS_VALIDATION']
+  processing_latency_ms integer [note: 'Tiempo de procesamiento']
+  redis_distance_meters decimal(8,2) [note: 'Distancia calculada por Redis']
+  jts_validation_result boolean [note: 'Resultado de validación JTS si aplicó']
+  
+  // Estado de alerta
   alert_generated boolean [default: false]
-  alert_priority varchar(10) [note: 'Prioridad de la alerta generada']
+  alert_priority varchar(10)
   acknowledged boolean [default: false]
-  acknowledged_by integer [ref: > users.id]
+  acknowledged_by_profile_id integer [ref: > user_profiles.id]
   acknowledged_at timestamp
   
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
   
   indexes {
-    (geofence_id, event_timestamp) [name: 'idx_geofence_events_fence_time']
     (vehicle_id, event_timestamp) [name: 'idx_geofence_events_vehicle_time']
-    (event_type, alert_generated) [name: 'idx_geofence_events_type_alert']
-    (acknowledged, alert_priority) [name: 'idx_geofence_events_pending_alerts']
+    (geofence_id, event_timestamp) [name: 'idx_geofence_events_fence_time']
+    (event_type, alert_generated) [name: 'idx_geofence_events_alerts']
+    (acknowledged, alert_priority) [name: 'idx_geofence_events_pending']
+    (created_at) [name: 'idx_geofence_events_created'] // Para particionado
   }
   
-  Note: 'Registro de eventos de geocercas (entradas, salidas, violaciones)'
+  Note: 'Eventos de geocercas YA PROCESADOS por Redis+JTS - solo registro'
 }
 
-Table route_corridors {
-  id integer [primary key, increment]
-  route_id integer [ref: > routes.id, not null]
-  segment_name varchar(100)
-  segment_order integer [not null]
+// Particionado por fecha para mejor performance
+// PARTITION BY RANGE (created_at);
+
+Table bus_stop_events {
+  id bigint [primary key, increment]
+  bus_stop_id integer [not null, ref: > bus_stops.id]
+  vehicle_id integer [not null, ref: > vehicles.id]
+  driver_profile_id integer [ref: > user_profiles.id]
   
-  // Geometría del corredor
+  // Datos del evento de paradero
+  event_type varchar(20) [not null, note: 'ARRIVAL, DEPARTURE, DWELL_VIOLATION, SKIP']
+  arrival_timestamp timestamp [note: 'Llegada al paradero']
+  departure_timestamp timestamp [note: 'Salida del paradero']
+  dwell_seconds integer [note: 'Tiempo de permanencia']
+  
+  // Datos de posición
+  arrival_latitude decimal(10,8)
+  arrival_longitude decimal(11,8)
+  departure_latitude decimal(10,8)
+  departure_longitude decimal(11,8)
+  
+  // Cumplimiento de itinerario
+  scheduled_arrival timestamp [note: 'Hora programada de llegada']
+  delay_seconds integer [note: 'Retraso en segundos (+ tarde, - temprano)']
+  compliance_status varchar(20) [note: 'ON_TIME, LATE, EARLY, SKIPPED']
+  
+  // Metadatos
+  processing_source varchar(20) [default: 'GEOFENCE_SYSTEM']
+  notes text
+  
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (bus_stop_id, arrival_timestamp) [name: 'idx_bus_stop_events_stop_time']
+    (vehicle_id, arrival_timestamp) [name: 'idx_bus_stop_events_vehicle_time']
+    (compliance_status, created_at) [name: 'idx_bus_stop_events_compliance']
+  }
+  
+  Note: 'Eventos específicos de paraderos derivados de geofence_events'
+}
+
+Table speed_violations {
+  id bigint [primary key, increment]
+  vehicle_id integer [not null, ref: > vehicles.id]
+  tracker_id integer [not null, ref: > trackers.id]
+  driver_profile_id integer [ref: > user_profiles.id]
+  geofence_id integer [ref: > geofences.id, note: 'Zona de velocidad específica']
+  
+  // Datos de la violación
+  violation_type varchar(20) [not null, note: 'SPEED_LIMIT, RECKLESS_DRIVING']
+  recorded_speed decimal(5,2) [not null]
+  speed_limit decimal(5,2) [not null]
+  excess_speed decimal(5,2) [not null, note: 'Velocidad que excede el límite']
+  
+  // Ubicación
+  latitude decimal(10,8) [not null]
+  longitude decimal(11,8) [not null]
+  
+  // Duración de la violación
+  start_timestamp timestamp [not null]
+  end_timestamp timestamp
+  duration_seconds integer
+  
+  // Severidad automática
+  severity varchar(20) [note: 'MINOR, MODERATE, SEVERE, CRITICAL']
+  
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (vehicle_id, start_timestamp) [name: 'idx_speed_violations_vehicle_time']
+    (severity, created_at) [name: 'idx_speed_violations_severity']
+    (geofence_id, start_timestamp) [name: 'idx_speed_violations_zone_time']
+  }
+  
+  Note: 'Violaciones de velocidad detectadas y procesadas'
+}
+
+Table route_deviations {
+  id bigint [primary key, increment]
+  vehicle_id integer [not null, ref: > vehicles.id]
+  route_id integer [not null, ref: > routes.id]
+  driver_profile_id integer [ref: > user_profiles.id]
+  
+  // Datos del desvío
+  deviation_type varchar(20) [not null, note: 'MINOR_DEVIATION, MAJOR_DEVIATION, UNAUTHORIZED_ROUTE']
   start_latitude decimal(10,8) [not null]
   start_longitude decimal(11,8) [not null]
-  end_latitude decimal(10,8) [not null]
-  end_longitude decimal(11,8) [not null]
-  corridor_width_meters integer [default: 100, note: 'Ancho del corredor permitido']
+  end_latitude decimal(10,8)
+  end_longitude decimal(11,8)
   
-  // Configuración de velocidad
-  max_speed_kmh integer [note: 'Velocidad máxima permitida en este segmento']
-  min_speed_kmh integer [note: 'Velocidad mínima requerida']
+  // Tiempo del desvío
+  start_timestamp timestamp [not null]
+  end_timestamp timestamp
+  duration_seconds integer
   
-  // Asociación con geocerca
-  geofence_id integer [ref: > geofences.id, note: 'Geocerca que define este corredor']
+  // Distancia del desvío
+  max_deviation_meters decimal(8,2) [note: 'Máxima distancia de la ruta autorizada']
+  total_deviation_distance decimal(8,2) [note: 'Distancia total del desvío']
   
-  is_active boolean [default: true]
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+  // Estado
+  is_authorized boolean [default: false, note: 'Desvío autorizado por control']
+  authorized_by_profile_id integer [ref: > user_profiles.id]
+  authorization_reason text
   
-  indexes {
-    (route_id, segment_order) [name: 'idx_corridors_route_order']
-    (geofence_id) [name: 'idx_corridors_geofence']
-  }
-  
-  Note: 'Corredores de ruta para detectar desvíos no autorizados'
-}
-
-Table speed_zones {
-  id integer [primary key, increment]
-  name varchar(100) [not null]
-  zone_type varchar(30) [not null, note: 'SCHOOL_ZONE, HOSPITAL_ZONE, RESIDENTIAL, COMMERCIAL, HIGHWAY']
-  geofence_id integer [ref: > geofences.id, not null]
-  
-  // Límites de velocidad
-  max_speed_kmh integer [not null]
-  warning_speed_kmh integer [note: 'Velocidad que genera advertencia']
-  
-  // Horarios especiales
-  special_hours_start time [note: 'Inicio de horario especial (ej: zona escolar)']
-  special_hours_end time [note: 'Fin de horario especial']
-  special_max_speed_kmh integer [note: 'Velocidad máxima en horario especial']
-  
-  applies_to_routes jsonb [note: 'Array de route_ids afectadas por esta zona']
-  
-  is_active boolean [default: true]
   created_at timestamp [default: `CURRENT_TIMESTAMP`]
   
   indexes {
-    (zone_type, is_active) [name: 'idx_speed_zones_type']
-    (geofence_id) [name: 'idx_speed_zones_geofence']
+    (vehicle_id, start_timestamp) [name: 'idx_route_deviations_vehicle_time']
+    (route_id, start_timestamp) [name: 'idx_route_deviations_route_time']
+    (is_authorized, duration_seconds) [name: 'idx_route_deviations_unauthorized']
   }
   
-  Note: 'Zonas con límites de velocidad específicos'
+  Note: 'Desvíos de ruta detectados por validación JTS de corredores'
 }
-
 
 // ========================================
-// TABLA SIMPLE DE POLILÍNEAS PARA RUTAS
+// HISTÓRICO GPS - SOLO PARA REPORTES
+// Redis maneja tiempo real, PostgreSQL historial
 // ========================================
 
-Table route_polylines {
-  id integer [primary key, increment]
-  route_id integer [ref: > routes.id, not null]
-  name varchar(100) [not null, note: 'Nombre descriptivo: "Ruta A1 - Ida"']
-  direction varchar(20) [not null, note: 'IDA, VUELTA, BIDIRECCIONAL']
+Table location_history {
+  id bigint [primary key, increment]
+  tracker_id integer [not null, ref: > trackers.id]
+  vehicle_id integer [not null, ref: > vehicles.id] // Desnormalizado
+  latitude decimal(10,8) [not null]
+  longitude decimal(11,8) [not null]
+  speed decimal(5,2) [default: 0]
+  heading integer
+  timestamp timestamp [not null]
+  received_at timestamp [default: `CURRENT_TIMESTAMP`]
   
-  // Coordenadas de la polilínea (fácil para edición web)
-  coordinates jsonb [not null, note: 'Array simple: [[lat,lng], [lat,lng], [lat,lng], ...]']
-  
-  // Opcional: polilínea codificada para optimización
-  encoded_polyline text [note: 'Codificada de Google (se puede generar automáticamente)']
-  
-  // Configuración visual
-  color varchar(7) [note: 'Color hex específico para esta polilínea (hereda de ruta si es null)']
-  stroke_width integer [default: 4, note: 'Grosor de línea en píxeles']
-  stroke_opacity decimal(3,2) [default: 0.8, note: 'Transparencia de 0.0 a 1.0']
-  
-  // Metadatos simples
-  total_distance_km decimal(6,2) [note: 'Distancia total calculada automáticamente']
-  estimated_time_minutes integer [note: 'Tiempo estimado de recorrido']
-  
-  is_active boolean [default: true]
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
-  created_by integer [ref: > users.id]
+  // Solo datos esenciales para reportes históricos
+  // Eliminamos: accuracy, satellites, battery_level, etc.
   
   indexes {
-    (route_id, direction) [name: 'idx_polylines_route_direction']
-    (is_active) [name: 'idx_polylines_active']
+    (vehicle_id, timestamp) [name: 'idx_location_history_vehicle_time']
+    (timestamp) [name: 'idx_location_history_timestamp'] // Para particionado
   }
   
-  Note: 'Polilíneas simples que definen las rutas exactas para visualización en mapa'
+  Note: 'Histórico GPS simplificado - para reportes y análisis posterior'
 }
+// PARTITION BY RANGE (timestamp); // Particionado mensual
+
+// ========================================
+// ALERTAS Y EVENTOS DEL SISTEMA
+// ========================================
+
+Table system_alerts {
+  id bigint [primary key, increment]
+  alert_type varchar(50) [not null, note: 'GEOFENCE_VIOLATION, SPEED_VIOLATION, ROUTE_DEVIATION, PANIC_BUTTON']
+  source_table varchar(50) [note: 'Tabla de origen: geofence_events, speed_violations, etc.']
+  source_id bigint [note: 'ID del registro de origen']
+  
+  vehicle_id integer [not null, ref: > vehicles.id]
+  driver_profile_id integer [ref: > user_profiles.id]
+  
+  priority varchar(10) [not null, note: 'LOW, MEDIUM, HIGH, CRITICAL']
+  title varchar(200) [not null]
+  description text
+  
+  // Estado de la alerta
+  status varchar(20) [default: 'ACTIVE', note: 'ACTIVE, ACKNOWLEDGED, RESOLVED, DISMISSED']
+  acknowledged_by_profile_id integer [ref: > user_profiles.id]
+  acknowledged_at timestamp
+  resolved_at timestamp
+  
+  // Datos adicionales
+  metadata jsonb [note: 'Datos específicos según tipo de alerta']
+  
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (status, priority, created_at) [name: 'idx_alerts_active_priority']
+    (vehicle_id, created_at) [name: 'idx_alerts_vehicle_time']
+    (alert_type, created_at) [name: 'idx_alerts_type_time']
+  }
+  
+  Note: 'Alertas consolidadas del sistema - todas las fuentes'
+}
+
+Table panic_alerts {
+  id bigint [primary key, increment]
+  tracker_id integer [not null, ref: > trackers.id]
+  vehicle_id integer [not null, ref: > vehicles.id]
+  driver_profile_id integer [ref: > user_profiles.id]
+  
+  latitude decimal(10,8) [not null]
+  longitude decimal(11,8) [not null]
+  
+  status varchar(20) [default: 'ACTIVE', note: 'ACTIVE, ACKNOWLEDGED, RESOLVED, FALSE_ALARM']
+  priority varchar(10) [default: 'CRITICAL']
+  
+  acknowledged_by_profile_id integer [ref: > user_profiles.id]
+  acknowledged_at timestamp
+  resolved_at timestamp
+  resolution_notes text
+  
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (status, created_at) [name: 'idx_panic_status_time']
+    (vehicle_id, created_at) [name: 'idx_panic_vehicle_time']
+  }
+}
+
+// ========================================
+// CONFIGURACIÓN DEL SISTEMA
+// ========================================
+
+Table redis_sync_log {
+  id integer [primary key, increment]
+  sync_type varchar(50) [not null, note: 'GEOFENCES_FULL, GEOFENCE_UPDATE, POLYLINE_UPDATE, CONFIG_CHANGE']
+  table_name varchar(50) [not null]
+  record_id integer
+  redis_key varchar(200)
+  
+  // Hash para detectar cambios
+  old_hash varchar(64) [note: 'Hash anterior del registro']
+  new_hash varchar(64) [note: 'Hash nuevo del registro']
+  change_type varchar(20) [note: 'CREATE, UPDATE, DELETE, NO_CHANGE']
+  
+  status varchar(20) [not null, note: 'SUCCESS, FAILED, PARTIAL']
+  error_message text
+  records_processed integer [default: 0]
+  
+  started_at timestamp [not null]
+  completed_at timestamp
+  duration_ms integer
+  
+  Note: 'Log de sincronización entre PostgreSQL y Redis con control de cambios'
+}
+
+Table system_config {
+  id integer [primary key, increment]
+  config_key varchar(100) [unique, not null]
+  config_value text [not null]
+  description text
+  data_type varchar(20) [default: 'STRING', note: 'STRING, INTEGER, BOOLEAN, JSON']
+  
+  updated_by_profile_id integer [ref: > user_profiles.id]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+  
+  Note: 'Configuración global del sistema'
+}
+
+// ========================================
+// VISTAS PARA REPORTES OPTIMIZADOS
+// ========================================
+
+/*
+// Vista consolidada de eventos por vehículo
+CREATE VIEW vehicle_events_summary AS
+SELECT 
+  v.id as vehicle_id,
+  v.plate_number,
+  COUNT(ge.id) as total_geofence_events,
+  COUNT(CASE WHEN ge.event_type = 'ENTRY' THEN 1 END) as entries,
+  COUNT(CASE WHEN ge.event_type = 'EXIT' THEN 1 END) as exits,
+  COUNT(sv.id) as speed_violations,
+  COUNT(rd.id) as route_deviations,
+  MAX(ge.event_timestamp) as last_event
+FROM vehicles v
+LEFT JOIN geofence_events ge ON v.id = ge.vehicle_id
+LEFT JOIN speed_violations sv ON v.id = sv.vehicle_id  
+LEFT JOIN route_deviations rd ON v.id = rd.vehicle_id
+WHERE ge.event_timestamp >= CURRENT_DATE - INTERVAL '30 days'
+GROUP BY v.id, v.plate_number;
+
+// Vista de alertas pendientes
+CREATE VIEW pending_alerts AS
+SELECT 
+  sa.id,
+  sa.alert_type,
+  sa.priority,
+  sa.title,
+  v.plate_number,
+  sa.created_at,
+  EXTRACT(EPOCH FROM (NOW() - sa.created_at))/60 as minutes_ago
+FROM system_alerts sa
+JOIN vehicles v ON sa.vehicle_id = v.id
+WHERE sa.status = 'ACTIVE'
+ORDER BY sa.priority DESC, sa.created_at ASC;
+*/
