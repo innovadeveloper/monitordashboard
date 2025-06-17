@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    # Usar imagen que incluye PostGIS - SIN comando postgis en shared_preload_libraries
+    image: postgis/postgis:14-3.2
+    container_name: postgres_postgis
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: coordenadasdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Comando básico sin shared_preload_libraries problemático
+    command: >
+      postgres 
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
