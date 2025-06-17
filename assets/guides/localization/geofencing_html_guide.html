@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Geofencing para Monitoreo Vehicular</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .scenario-selector {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .scenario-selector h2 {
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .scenario-btn {
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .scenario-btn:hover {
+            border-color: #9ca3af;
+            transform: translateY(-2px);
+        }
+
+        .scenario-btn.active {
+            border-color: #2563eb;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .scenario-btn h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .config-panel, .simulator-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .config-box {
+            background: #eff6ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .config-box h3 {
+            color: #1e40af;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-details {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .config-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .config-value {
+            font-weight: 600;
+        }
+
+        .config-value.true {
+            color: #059669;
+        }
+
+        .config-value.false {
+            color: #dc2626;
+        }
+
+        .config-value.other {
+            color: #2563eb;
+        }
+
+        .use-case-box {
+            background: #f0fdf4;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .use-case-box h4 {
+            color: #166534;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .use-case-box p {
+            color: #15803d;
+            font-size: 0.9rem;
+        }
+
+        .alerts-panel {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .alerts-panel h4 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .alerts-container {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            border-left: 4px solid;
+        }
+
+        .alert-item.high {
+            border-left-color: #dc2626;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .alert-item.warning {
+            border-left-color: #d97706;
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .alert-item.info {
+            border-left-color: #2563eb;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .alert-empty {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+            padding: 40px 20px;
+        }
+
+        .simulator-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .simulator-controls h3 {
+            color: #1f2937;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn.start {
+            background: #059669;
+            color: white;
+        }
+
+        .control-btn.start:hover {
+            background: #047857;
+        }
+
+        .control-btn.stop {
+            background: #dc2626;
+            color: white;
+        }
+
+        .control-btn.stop:hover {
+            background: #b91c1c;
+        }
+
+        .map-container {
+            position: relative;
+            background: #dcfce7;
+            border: 2px solid #bbf7d0;
+            border-radius: 8px;
+            height: 300px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .geofence {
+            position: absolute;
+            left: 30%;
+            top: 30%;
+            width: 40%;
+            height: 40%;
+            border: 4px dashed #2563eb;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .geofence-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #2563eb;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .vehicle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            transition: all 1s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .vehicle.active {
+            background: #dc2626;
+            animation: pulse 1s infinite;
+        }
+
+        .vehicle.inactive {
+            background: #6b7280;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .vehicle-info {
+            position: absolute;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 0.7rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .vehicle-info div {
+            color: #6b7280;
+        }
+
+        .map-legend {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 0.7rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-color.vehicle {
+            background: #dc2626;
+        }
+
+        .legend-color.geofence {
+            border: 2px dashed #2563eb;
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .status-panel {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .status-panel h4 {
+            margin-bottom: 10px;
+        }
+
+        .status-item {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .guide-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .guide-section h3 {
+            margin-bottom: 20px;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .guide-column h4 {
+            margin-bottom: 15px;
+            color: #2563eb;
+        }
+
+        .guide-column ul {
+            list-style: none;
+        }
+
+        .guide-column li {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            padding-left: 8px;
+            position: relative;
+        }
+
+        .guide-column li::before {
+            content: "•";
+            color: #2563eb;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .guide-column li strong {
+            color: #1f2937;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .guide-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .scenario-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                📍 Sistema de Geofencing para Monitoreo Vehicular
+            </h1>
+            <p>Configuraciones y criterios para el control de vehículos con tracker GPS</p>
+        </div>
+
+        <!-- Selector de Escenarios -->
+        <div class="scenario-selector">
+            <h2>Selecciona un Escenario de Geofencing:</h2>
+            <div class="scenario-grid">
+                <button class="scenario-btn active" data-scenario="entry-exit">
+                    <h3>Detección de Entrada/Salida</h3>
+                </button>
+                <button class="scenario-btn" data-scenario="dwell-time">
+                    <h3>Control de Tiempo de Permanencia</h3>
+                </button>
+                <button class="scenario-btn" data-scenario="route-corridor">
+                    <h3>Corredor de Ruta Autorizada</h3>
+                </button>
+                <button class="scenario-btn" data-scenario="speed-zone">
+                    <h3>Zona de Velocidad Controlada</h3>
+                </button>
+                <button class="scenario-btn" data-scenario="schedule-based">
+                    <h3>Geocerca con Horarios</h3>
+                </button>
+                <button class="scenario-btn" data-scenario="multi-route">
+                    <h3>Geocerca Multi-Ruta</h3>
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="main-content">
+            <!-- Panel de Configuración -->
+            <div class="config-panel">
+                <div class="config-box">
+                    <h3>🎯 <span id="config-title">Detección de Entrada/Salida</span></h3>
+                    <p id="config-description">Detecta cuando un vehículo entra o sale de una zona específica</p>
+                    
+                    <div class="config-details">
+                        <h4>⚙️ Configuración:</h4>
+                        <div id="config-items">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+
+                    <div class="use-case-box">
+                        <h4>🚌 Caso de Uso:</h4>
+                        <p id="use-case-text">Control de acceso a terminales, zonas restringidas, paraderos</p>
+                    </div>
+                </div>
+
+                <!-- Panel de Alertas -->
+                <div class="alerts-panel">
+                    <h4>🚨 Alertas Generadas:</h4>
+                    <div class="alerts-container" id="alerts-container">
+                        <div class="alert-empty">
+                            No hay alertas. Inicia la simulación para ver eventos.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulador Visual -->
+            <div class="simulator-panel">
+                <div class="simulator-controls">
+                    <h3>Simulador en Tiempo Real</h3>
+                    <button class="control-btn start" id="simulation-btn">
+                        ▶️ Iniciar
+                    </button>
+                </div>
+
+                <!-- Mapa de Simulación -->
+                <div class="map-container">
+                    <div class="geofence"></div>
+                    <div class="geofence-label">Geocerca Configurada</div>
+                    
+                    <div class="vehicle inactive" id="vehicle" style="left: 50%; top: 50%;"></div>
+                    
+                    <div class="vehicle-info" id="vehicle-info" style="left: 55%; top: 42%;">
+                        🚌 Bus-001
+                        <div>GPS: <span id="gps-coords">50, 50</span></div>
+                    </div>
+
+                    <div class="map-legend">
+                        <div class="legend-item">
+                            <div class="legend-color vehicle"></div>
+                            <span>Vehículo activo</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color geofence"></div>
+                            <span>Geocerca</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado actual -->
+                <div class="status-panel">
+                    <h4>Estado del Sistema:</h4>
+                    <div class="status-item">🎯 <strong>Escenario:</strong> <span id="status-scenario">Detección de Entrada/Salida</span></div>
+                    <div class="status-item">📡 <strong>GPS Tracking:</strong> <span id="status-gps">Inactivo</span></div>
+                    <div class="status-item">⚡ <strong>Alertas:</strong> <span id="status-alerts">0</span> generadas</div>
+                    <div class="status-item">🔧 <strong>Criterios:</strong> <span id="status-criteria">2</span> activos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guía de Implementación -->
+        <div class="guide-section">
+            <h3>🛡️ Criterios de Geofencing para Trackers GPS</h3>
+            
+            <div class="guide-grid">
+                <div class="guide-column">
+                    <h4>Eventos Básicos de Tracking:</h4>
+                    <ul>
+                        <li><strong>ENTRY:</strong> Vehículo entra a geocerca definida</li>
+                        <li><strong>EXIT:</strong> Vehículo sale de geocerca definida</li>
+                        <li><strong>DWELL_VIOLATION:</strong> Tiempo excesivo en zona</li>
+                        <li><strong>ROUTE_DEVIATION:</strong> Fuera del corredor autorizado</li>
+                        <li><strong>SPEED_VIOLATION:</strong> Exceso de velocidad en zona</li>
+                    </ul>
+                </div>
+                
+                <div class="guide-column">
+                    <h4>Configuraciones Avanzadas:</h4>
+                    <ul>
+                        <li><strong>Horarios activos:</strong> Geocercas con programación temporal</li>
+                        <li><strong>Días específicos:</strong> Lun-Vie, fines de semana, feriados</li>
+                        <li><strong>Multi-ruta:</strong> Geocercas que aplican solo a ciertas rutas</li>
+                        <li><strong>Prioridades:</strong> LOW, MEDIUM, HIGH, CRITICAL</li>
+                        <li><strong>Tolerancias:</strong> Buffers y márgenes de error</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuraciones de geofencing
+        const geofenceConfigs = {
+            'entry-exit': {
+                title: 'Detección de Entrada/Salida',
+                description: 'Detecta cuando un vehículo entra o sale de una zona específica',
+                config: {
+                    alert_on_entry: true,
+                    alert_on_exit: true,
+                    alert_on_dwell_time: false
+                },
+                useCase: 'Control de acceso a terminales, zonas restringidas, paraderos'
+            },
+            'dwell-time': {
+                title: 'Control de Tiempo de Permanencia',
+                description: 'Controla cuánto tiempo permanece un vehículo en una zona',
+                config: {
+                    alert_on_entry: false,
+                    alert_on_exit: false,
+                    alert_on_dwell_time: true,
+                    max_dwell_minutes: 5
+                },
+                useCase: 'Paraderos (máx 5 min), carga/descarga, tiempos de terminal'
+            },
+            'route-corridor': {
+                title: 'Corredor de Ruta Autorizada',
+                description: 'Verifica que el vehículo se mantenga dentro del corredor permitido',
+                config: {
+                    alert_on_exit: true,
+                    geometry_type: 'CORRIDOR',
+                    corridor_width: '100m'
+                },
+                useCase: 'Cumplimiento de ruta, prevención de desvíos no autorizados'
+            },
+            'speed-zone': {
+                title: 'Zona de Velocidad Controlada',
+                description: 'Controla la velocidad dentro de zonas específicas',
+                config: {
+                    alert_on_entry: true,
+                    max_speed_kmh: 30,
+                    zone_type: 'SCHOOL_ZONE'
+                },
+                useCase: 'Zonas escolares, hospitales, centros comerciales'
+            },
+            'schedule-based': {
+                title: 'Geocerca con Horarios',
+                description: 'Geocerca que solo está activa en ciertos horarios',
+                config: {
+                    active_hours_start: '06:00',
+                    active_hours_end: '22:00',
+                    active_days: 'Lun-Vie'
+                },
+                useCase: 'Zonas peatonales diurnas, restricciones por horario'
+            },
+            'multi-route': {
+                title: 'Geocerca Multi-Ruta',
+                description: 'Una geocerca que aplica solo a rutas específicas',
+                config: {
+                    applies_to_routes: '[1, 3, 5]',
+                    alert_priority: 'MEDIUM'
+                },
+                useCase: 'Zonas que afectan solo ciertas rutas, desvíos temporales'
+            }
+        };
+
+        // Estado de la aplicación
+        let activeScenario = 'entry-exit';
+        let simulationRunning = false;
+        let vehiclePosition = { x: 50, y: 50 };
+        let alerts = [];
+        let simulationInterval;
+
+        // Elementos del DOM
+        const scenarioBtns = document.querySelectorAll('.scenario-btn');
+        const simulationBtn = document.getElementById('simulation-btn');
+        const vehicle = document.getElementById('vehicle');
+        const vehicleInfo = document.getElementById('vehicle-info');
+        const gpsCoords = document.getElementById('gps-coords');
+        const alertsContainer = document.getElementById('alerts-container');
+
+        // Event listeners
+        scenarioBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                scenarioBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeScenario = btn.dataset.scenario;
+                updateScenario();
+            });
+        });
+
+        simulationBtn.addEventListener('click', toggleSimulation);
+
+        // Funciones principales
+        function updateScenario() {
+            const config = geofenceConfigs[activeScenario];
+            
+            // Actualizar título y descripción
+            document.getElementById('config-title').textContent = config.title;
+            document.getElementById('config-description').textContent = config.description;
+            document.getElementById('use-case-text').textContent = config.useCase;
+            document.getElementById('status-scenario').textContent = config.title;
+            
+            // Actualizar configuración
+            const configItems = document.getElementById('config-items');
+            configItems.innerHTML = '';
+            
+            let activeCriteria = 0;
+            Object.entries(config.config).forEach(([key, value]) => {
+                const item = document.createElement('div');
+                item.className = 'config-item';
+                
+                const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let valueClass = 'other';
+                let displayValue = value;
+                
+                if (typeof value === 'boolean') {
+                    valueClass = value ? 'true' : 'false';
+                    displayValue = value ? 'SÍ' : 'NO';
+                    if (value) activeCriteria++;
+                } else {
+                    activeCriteria++;
+                }
+                
+                item.innerHTML = `
+                    <span>${label}:</span>
+                    <span class="config-value ${valueClass}">${displayValue}</span>
+                `;
+                
+                configItems.appendChild(item);
+            });
+            
+            document.getElementById('status-criteria').textContent = activeCriteria;
+        }
+
+        function toggleSimulation() {
+            simulationRunning = !simulationRunning;
+            
+            if (simulationRunning) {
+                startSimulation();
+                simulationBtn.innerHTML = '⏹️ Detener';
+                simulationBtn.className = 'control-btn stop';
+                vehicle.className = 'vehicle active';
+                document.getElementById('status-gps').textContent = 'Activo (cada 10s)';
+            } else {
+                stopSimulation();
+                simulationBtn.innerHTML = '▶️ Iniciar';
+                simulationBtn.className = 'control-btn start';
+                vehicle.className = 'vehicle inactive';
+                document.getElementById('status-gps').textContent = 'Inactivo';
+            }
+        }
+
+        function startSimulation() {
+            simulationInterval = setInterval(() => {
+                // Mover vehículo aleatoriamente
+                vehiclePosition.x += (Math.random() - 0.5) * 10;
+                vehiclePosition.y += (Math.random() - 0.5) * 10;
+                
+                // Mantener dentro del área visible
+                vehiclePosition.x = Math.max(10, Math.min(90, vehiclePosition.x));
+                vehiclePosition.y = Math.max(10, Math.min(90, vehiclePosition.y));
+                
+                // Actualizar posición visual
+                vehicle.style.left = vehiclePosition.x + '%';
+                vehicle.style.top = vehiclePosition.y + '%';
+                
+                // Actualizar info del vehículo
+                vehicleInfo.style.left = Math.min(vehiclePosition.x + 5, 85) + '%';
+                vehicleInfo.style.top = Math.max(vehiclePosition.y - 8, 5) + '%';
+                gpsCoords.textContent = `${Math.round(vehiclePosition.x)}, ${Math.round(vehiclePosition.y)}`;
+                
+                // Detectar eventos de geofencing
+                checkGeofenceEvents();
+            }, 1000);
+        }
+
+        function stopSimulation() {
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+        }
+
+        function checkGeofenceEvents() {
+            // Calcular si está dentro de la geocerca (círculo centrado en 50,50 con radio 20)
+            const centerX = 50, centerY = 50, radius = 20;
+            const distance = Math.sqrt(
+                Math.pow(vehiclePosition.x - centerX, 2) + 
+                Math.pow(vehiclePosition.y - centerY, 2)
+            );
+            const isInside = distance <= radius;
+            
+            const config = geofenceConfigs[activeScenario].config;
+            const now = new Date().toLocaleTimeString();
+
+            // Generar eventos aleatoriamente basados en la configuración
+            if (Math.random() > 0.85) { // 15% probabilidad por segundo
+                let eventType, message, priority;
+                
+                if (isInside && config.alert_on_entry) {
+                    eventType = 'ENTRY';
+                    message = 'Vehículo entró a la geocerca';
+                    priority = 'info';
+                } else if (!isInside && config.alert_on_exit) {
+                    eventType = 'EXIT';
+                    message = 'Vehículo salió de la geocerca';
+                    priority = 'warning';
+                } else if (isInside && config.alert_on_dwell_time) {
+                    eventType = 'DWELL_VIOLATION';
+                    message = `Tiempo excesivo en geocerca (>5 min)`;
+                    priority = 'high';
+                } else if (config.max_speed_kmh) {
+                    eventType = 'SPEED_VIOLATION';
+                    message = `Exceso de velocidad: ${config.max_speed_kmh + 10}km/h en zona de ${config.max_speed_kmh}km/h`;
+                    priority = 'high';
+                } else if (config.geometry_type === 'CORRIDOR') {
+                    eventType = 'ROUTE_DEVIATION';
+                    message = 'Vehículo fuera del corredor autorizado';
+                    priority = 'warning';
+                } else {
+                    return; // No generar evento
+                }
+                
+                addAlert({
+                    time: now,
+                    type: eventType,
+                    message: message,
+                    priority: priority
+                });
+            }
+        }
+
+        function addAlert(alert) {
+            alerts.unshift(alert);
+            alerts = alerts.slice(0, 5); // Mantener solo las últimas 5 alertas
+            
+            updateAlertsDisplay();
+            document.getElementById('status-alerts').textContent = alerts.length;
+        }
+
+        function updateAlertsDisplay() {
+            const container = alertsContainer;
+            
+            if (alerts.length === 0) {
+                container.innerHTML = '<div class="alert-empty">No hay alertas. Inicia la simulación para ver eventos.</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            alerts.forEach(alert => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert-item ${alert.priority}`;
+                alertDiv.innerHTML = `
+                    <div style="font-weight: 600;">${alert.time} - ${alert.type}</div>
+                    <div>${alert.message}</div>
+                `;
+                container.appendChild(alertDiv);
+            });
+        }
+
+        // Inicializar la aplicación
+        updateScenario();
+    </script>
+</body>
+</html>
